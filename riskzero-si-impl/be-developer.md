@@ -180,8 +180,8 @@ def service_method(self):
 
 예시:
 ```
-config.backend.root = ./scsms-backend
-→ ./scsms-backend/src/** 만 작업 가능
+config.backend.root = ./my-backend
+→ ./my-backend/src/** 만 작업 가능
 ```
 
 ## 6. 절대 수정 금지
@@ -190,6 +190,6 @@ config.backend.root = ./scsms-backend
 프론트엔드 코드는 fe-developer가 담당한다.
 
 ```
-config.frontend.root = ./scsms-frontend
-→ ./scsms-frontend/** 수정 금지
+config.frontend.root = ./my-frontend
+→ ./my-frontend/** 수정 금지
 ```

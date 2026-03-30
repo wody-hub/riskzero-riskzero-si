@@ -12,7 +12,7 @@ project:
   # 프로젝트 이름 (예: "GH-SCSMS", "안전관리시스템")
   name: ""
   # 프로젝트 README 경로 (프로젝트 전체 컨텍스트 파악용)
-  readmePath: ""
+  readme: ""
 
 # ------------------------------------------------------------------------------
 # 소스 자료 경로
@@ -68,7 +68,7 @@ auth:
 # 프론트엔드 설정
 # ------------------------------------------------------------------------------
 frontend:
-  # 프론트엔드 프로젝트 루트 경로 (예: "./scsms-frontend")
+  # 프론트엔드 프로젝트 루트 경로 (예: "./my-frontend")
   root: ""
   # 프레임워크: react | vue | angular | next
   framework: "react"
@@ -110,11 +110,21 @@ frontend:
     # 페이지네이션 컴포넌트명 (예: "Pagination", "TablePagination")
     component: ""
 
+  # 페이지/컴포넌트 디렉토리 구조 패턴
+  # {domain}은 도메인명 플레이스홀더 (예: user, project, safety)
+  structure:
+    # 목록 페이지 패턴 (예: "pages/{group}/{domain}/index.tsx")
+    listPage: ""
+    # 상세 페이지 패턴 (예: "pages/{group}/{domain}/components/{Domain}Detail.tsx")
+    detailPage: ""
+    # API 훅 패턴 (예: "pages/{group}/{domain}/{Domain}Api.ts")
+    api: ""
+
 # ------------------------------------------------------------------------------
 # 백엔드 설정
 # ------------------------------------------------------------------------------
 backend:
-  # 백엔드 프로젝트 루트 경로 (예: "./scsms-backend")
+  # 백엔드 프로젝트 루트 경로 (예: "./my-backend")
   root: ""
   # 프레임워크: spring-boot | express | nestjs | django
   framework: "spring-boot"
@@ -126,7 +136,7 @@ backend:
   testCmd: ""
   # 소스 루트 경로 (예: "src/main/java")
   sourceRoot: "src/main/java"
-  # 베이스 패키지 (예: "com.riskzero.scsms")
+  # 베이스 패키지 (예: "com.example.project")
   basePackage: ""
 
   # 패키지/디렉토리 구조 패턴

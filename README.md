@@ -20,7 +20,7 @@ cd ~/.claude/skills/gstack && ./setup
 ### Step 2: riskzero-si 설치
 
 ```bash
-git clone https://github.com/riskzero/riskzero-si-skills.git ~/.claude/skills/riskzero-si
+git clone https://github.com/wody-hub/riskzero-riskzero-si.git ~/.claude/skills/riskzero-si
 cd ~/.claude/skills/riskzero-si && ./setup
 ```
 

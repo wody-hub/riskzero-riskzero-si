@@ -25,12 +25,13 @@ allowed-tools:
 
 ## Step 0: 설정 파일 로드
 
-### 0-1. qa-config.yml 탐색
+### 0-1. 설정 파일 탐색
 
 아래 순서로 설정 파일을 찾는다:
 
-1. `.claude/qa-config.yml` (프로젝트 루트 기준)
-2. `qa-config.yml` (프로젝트 루트)
+1. `.claude/si-config.yml` (프로젝트 루트 기준)
+2. `.claude/qa-config.yml` (프로젝트 루트 기준)
+3. `qa-config.yml` (프로젝트 루트)
 
 찾으면 YAML 파싱하여 `config` 변수로 사용한다.
 
@@ -526,7 +527,7 @@ done
 
 ### 6-2. 브라우저 테스트
 
-qa-tester 에이전트 지침(`~/.claude/skills/qa-checklist/qa-tester.md`)을 참조하여 브라우저 테스트를 실행한다.
+qa-tester 에이전트 지침(`~/.claude/skills/riskzero-si-qa-checklist/qa-tester.md`)을 참조하여 브라우저 테스트를 실행한다.
 
 - 체크리스트 파일 경로와 대상 URL을 전달
 - 로그인 자격증명은 사용자에게 확인

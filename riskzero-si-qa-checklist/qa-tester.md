@@ -2,7 +2,7 @@
 
 체크리스트 기반으로 gstack browse(`$B`)를 사용하여 화면의 브라우저 테스트를 실행하고, 각 항목의 PASS/FAIL을 판정하여 리포트를 생성한다.
 
-**모든 URL, 포트, 인증 정보는 `qa-config.yml`에서 읽는다.**
+**모든 URL, 포트, 인증 정보는 `si-config.yml` (또는 `qa-config.yml`)에서 읽는다.**
 
 ## 역할
 
@@ -40,7 +40,7 @@ B=~/.claude/skills/gstack/browse/dist/browse
 
 ## 설정 참조
 
-테스트 실행 전 `qa-config.yml`에서 아래 값을 읽어 변수로 사용한다:
+테스트 실행 전 `si-config.yml` (또는 `qa-config.yml`)에서 아래 값을 읽어 변수로 사용한다:
 
 ```
 FRONTEND_URL = config.server.frontend.baseUrl    # 예: http://localhost:3100

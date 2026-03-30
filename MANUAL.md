@@ -79,7 +79,7 @@ cd ~/.claude/skills/gstack && ./setup
 ### Step 3: riskzero-si 설치
 
 ```bash
-git clone https://github.com/riskzero/riskzero-si-skills.git ~/.claude/skills/riskzero-si
+git clone https://github.com/wody-hub/riskzero-riskzero-si.git ~/.claude/skills/riskzero-si
 cd ~/.claude/skills/riskzero-si && ./setup
 ```
 
@@ -462,7 +462,7 @@ auth:
 
 ```yaml
 frontend:
-  root: "scsms-frontend"           # 프론트엔드 루트 디렉토리
+  root: "my-frontend"              # 프론트엔드 루트 디렉토리
   framework: "react"               # react | vue | angular | next
   buildCmd: "npm run build"
   lintCmd: "npm run lint"
@@ -479,13 +479,13 @@ frontend:
 
 ```yaml
 backend:
-  root: "scsms-backend"            # 백엔드 루트 디렉토리
+  root: "my-backend"               # 백엔드 루트 디렉토리
   framework: "spring-boot"         # spring-boot | express | nestjs | django
   language: "java"
   buildCmd: "./gradlew compileJava"
   testCmd: "./gradlew test"
   sourceRoot: "src/main/java"
-  basePackage: "com.riskzero.scsms"
+  basePackage: "com.example.project"
   structure:                        # 파일 패턴 (변수: {domain})
     controller: "api/**/{domain}/controller/*Controller.java"
     service: "api/**/{domain}/service/*ServiceImpl.java"

@@ -168,8 +168,8 @@ README.md의 스타일 가이드를 따른다:
 
 예시:
 ```
-config.frontend.root = ./scsms-frontend
-→ ./scsms-frontend/src/** 만 작업 가능
+config.frontend.root = ./my-frontend
+→ ./my-frontend/src/** 만 작업 가능
 ```
 
 ## 6. 절대 수정 금지
@@ -178,8 +178,8 @@ config.frontend.root = ./scsms-frontend
 백엔드 코드는 be-developer가 담당한다.
 
 ```
-config.backend.root = ./scsms-backend
-→ ./scsms-backend/** 수정 금지
+config.backend.root = ./my-backend
+→ ./my-backend/** 수정 금지
 ```
 
 ## 7. 검증
