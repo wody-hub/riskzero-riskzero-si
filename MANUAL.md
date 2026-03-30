@@ -453,7 +453,7 @@ auth:
   type: "jwt"
   loginApi: "/api/auth/login"
   loginFields:
-    id: "loginId"
+    username: "loginId"
     password: "password"
   tokenField: "accessToken"
   tokenHeader: "Authorization"
