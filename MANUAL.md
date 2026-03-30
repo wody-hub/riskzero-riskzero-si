@@ -328,7 +328,7 @@ plan/
 **사용 예시**:
 ```
 /riskzero-si-qa
-/riskzero-si-qa http://localhost:3000/example/list
+/riskzero-si-qa {si-config의 frontend.baseUrl}/목록경로
 ```
 
 **핵심 원칙**: 원인 파악 없이 코드를 수정하지 않습니다.
@@ -351,7 +351,7 @@ plan/
 **사용 예시**:
 ```
 /riskzero-si-browse
-/riskzero-si-browse http://localhost:3000/example/list
+/riskzero-si-browse {si-config의 frontend.baseUrl}/목록경로
 ```
 
 **산출물**: `plan/{기능명}/final-report.md` + 스크린샷 파일들
@@ -391,7 +391,7 @@ plan/
 
 ```
 /riskzero-si-qa-checklist 안전보건자료실   # 체크리스트 생성
-/riskzero-si-browse http://localhost:3000   # 브라우저 테스트
+/riskzero-si-browse                            # 브라우저 테스트 (URL은 si-config에서 자동 참조)
 ```
 
 체크리스트를 자동 생성하고, 브라우저에서 검증합니다.
@@ -437,12 +437,14 @@ sources:
 ```yaml
 server:
   frontend:
-    port: 3000
-    baseUrl: "http://localhost:3000"
+    port: 3100                              # 프로젝트에 맞게 변경
+    baseUrl: "http://localhost:3100"         # 프로젝트에 맞게 변경
   backend:
-    port: 8080
-    baseUrl: "http://localhost:8080"
+    port: 8085                              # 프로젝트에 맞게 변경
+    baseUrl: "http://localhost:8085"         # 프로젝트에 맞게 변경
 ```
+
+> 포트와 URL은 프로젝트마다 다릅니다. 반드시 실제 개발 서버 설정에 맞춰 변경하세요.
 
 #### 인증 설정
 

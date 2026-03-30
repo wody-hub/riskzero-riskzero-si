@@ -43,8 +43,8 @@ B=~/.claude/skills/gstack/browse/dist/browse
 테스트 실행 전 `si-config.yml` (또는 `qa-config.yml`)에서 아래 값을 읽어 변수로 사용한다:
 
 ```
-FRONTEND_URL = config.server.frontend.baseUrl    # 예: http://localhost:3000
-BACKEND_URL  = config.server.backend.baseUrl      # 예: http://localhost:8080
+FRONTEND_URL = config.server.frontend.baseUrl    # si-config.yml에서 읽음
+BACKEND_URL  = config.server.backend.baseUrl      # si-config.yml에서 읽음
 LOGIN_API    = config.auth.loginApi                # 예: /api/auth/login
 LOGIN_ID_FIELD = config.auth.loginFields.username    # 예: loginId
 LOGIN_PW_FIELD = config.auth.loginFields.password  # 예: password
