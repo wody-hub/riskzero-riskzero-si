@@ -447,7 +447,7 @@ plan/
 - "DDL에 {테이블}이 없습니다. 새로 생성해야 하나요?"
 
 **확인 포인트**:
-- `plan/impl-{기능명}.md` 파일을 열어서 **API 엔드포인트 목록**이 맞는지 확인
+- `plan/{기능명}/implementation-plan.md` 파일을 열어서 **API 엔드포인트 목록**이 맞는지 확인
 - **테이블 매핑**이 정확한지 확인 (잘못된 컬럼 참조가 있을 수 있음)
 - **파일 배치 경로**가 프로젝트 구조와 맞는지 확인
 
@@ -593,11 +593,11 @@ sources:
 ```yaml
 server:
   frontend:
-    port: 3100                              # 프로젝트에 맞게 변경
-    baseUrl: "http://localhost:3100"         # 프로젝트에 맞게 변경
+    port: 3000                              # 프로젝트에 맞게 변경
+    baseUrl: "http://localhost:3000"         # 프로젝트에 맞게 변경
   backend:
-    port: 8085                              # 프로젝트에 맞게 변경
-    baseUrl: "http://localhost:8085"         # 프로젝트에 맞게 변경
+    port: 8080                              # 프로젝트에 맞게 변경
+    baseUrl: "http://localhost:8080"         # 프로젝트에 맞게 변경
 ```
 
 > 포트와 URL은 프로젝트마다 다릅니다. 반드시 실제 개발 서버 설정에 맞춰 변경하세요.
@@ -673,7 +673,7 @@ database:
 **대처**:
 1. 에러 메시지를 확인 — 대부분 import 누락이나 타입 불일치
 2. `--be-only` 또는 `--fe-only`로 한쪽만 먼저 완성
-3. 그래도 실패하면 계획서(`plan/impl-{기능명}.md`)의 데이터 모델을 수정 후 재구현
+3. 그래도 실패하면 계획서(`plan/{기능명}/implementation-plan.md`)의 데이터 모델을 수정 후 재구현
 
 ```
 /riskzero-si-impl 안전보건자료실 --be-only    # 백엔드만 먼저
