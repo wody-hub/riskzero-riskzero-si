@@ -1,0 +1,181 @@
+# ==============================================================================
+# SI 프로젝트 설정 파일 템플릿
+# ==============================================================================
+# 이 파일을 .claude/si-config.yml 로 복사한 뒤, 프로젝트에 맞게 값을 채워주세요.
+# /riskzero-si-pipeline --init 명령으로 자동 생성할 수도 있습니다.
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 프로젝트 기본 정보
+# ------------------------------------------------------------------------------
+project:
+  # 프로젝트 이름 (예: "GH-SCSMS", "안전관리시스템")
+  name: ""
+  # 프로젝트 README 경로 (프로젝트 전체 컨텍스트 파악용)
+  readmePath: ""
+
+# ------------------------------------------------------------------------------
+# 소스 자료 경로
+# 기획서, 퍼블리싱, DDL 등 구현에 필요한 입력 자료의 위치
+# ------------------------------------------------------------------------------
+sources:
+  # 기획서/와이어프레임 디렉토리 (Figma export, PDF, 이미지 등)
+  wireframe: ""
+  # 퍼블리싱(HTML/CSS) 디렉토리 (마크업 개발자가 작업한 결과물)
+  publishing: ""
+  # DDL 파일 경로 (테이블 생성 SQL)
+  ddl: ""
+  # 샘플 코드 디렉토리 (AI가 참고할 기존 구현 예시)
+  sample: ""
+
+# ------------------------------------------------------------------------------
+# 서버 설정
+# 개발 서버 포트 및 API 베이스 URL
+# ------------------------------------------------------------------------------
+server:
+  frontend:
+    # 프론트엔드 개발 서버 포트 (예: 3100)
+    port: 3000
+    # 프론트엔드 베이스 URL (예: "http://localhost:3100")
+    baseUrl: "http://localhost:3000"
+  backend:
+    # 백엔드 개발 서버 포트 (예: 8085)
+    port: 8080
+    # 백엔드 API 베이스 URL (예: "http://localhost:8085")
+    baseUrl: "http://localhost:8080"
+
+# ------------------------------------------------------------------------------
+# 인증 설정
+# 로그인 API 및 토큰 관리 방식
+# ------------------------------------------------------------------------------
+auth:
+  # 인증 방식: jwt | session | cookie
+  type: "jwt"
+  # 로그인 API 엔드포인트 (예: "/api/auth/login")
+  loginApi: ""
+  # 로그인 요청 필드명 (예: { username: "userId", password: "userPw" })
+  loginFields:
+    username: "userId"
+    password: "password"
+  # 로그인 응답에서 토큰을 추출할 필드 경로 (예: "data.accessToken")
+  tokenField: ""
+  # 요청 헤더에 토큰을 실을 헤더명 (예: "Authorization")
+  tokenHeader: "Authorization"
+  # 토큰 접두사 (예: "Bearer ")
+  tokenPrefix: "Bearer "
+
+# ------------------------------------------------------------------------------
+# 프론트엔드 설정
+# ------------------------------------------------------------------------------
+frontend:
+  # 프론트엔드 프로젝트 루트 경로 (예: "./scsms-frontend")
+  root: ""
+  # 프레임워크: react | vue | angular | next
+  framework: "react"
+  # 빌드 명령어 (예: "npm run build", "yarn build")
+  buildCmd: "npm run build"
+  # 린트 명령어 (예: "npm run lint", "npx eslint .")
+  lintCmd: "npm run lint"
+
+  # 라우트 설정
+  routes:
+    # 메인 라우터 파일 경로 (예: "src/router/index.tsx")
+    main: ""
+    # 서브 라우터 파일 경로 (기능별 라우트 분리 시, 예: "src/router/adminRoutes.tsx")
+    sub: ""
+
+  # 페이지 파일 구조 패턴
+  pages:
+    # 페이지 파일 루트 디렉토리 (예: "src/pages")
+    root: "src/pages"
+    # 목록 페이지 파일명 패턴 (예: "{Domain}ListPage.tsx")
+    listFile: "{Domain}ListPage.tsx"
+    # 상세/등록 페이지 파일명 패턴 (예: "{Domain}DetailPage.tsx")
+    detailPattern: "{Domain}DetailPage.tsx"
+    # API 훅 파일명 패턴 (예: "use{Domain}Api.ts")
+    apiPattern: "use{Domain}Api.ts"
+
+  # 유효성 검증 방식: react-hook-form | formik | yup | zod | manual
+  validation: ""
+
+  # 파일 업로드 설정
+  fileUpload:
+    # 파일 업로드 컴포넌트명 (예: "FileUpload", "DropzoneArea")
+    component: ""
+    # 컴포넌트에 전달하는 주요 props 목록 (예: ["docId", "deleteFileNos", "onUploadComplete"])
+    props: []
+
+  # 페이지네이션 설정
+  pagination:
+    # 페이지네이션 컴포넌트명 (예: "Pagination", "TablePagination")
+    component: ""
+
+# ------------------------------------------------------------------------------
+# 백엔드 설정
+# ------------------------------------------------------------------------------
+backend:
+  # 백엔드 프로젝트 루트 경로 (예: "./scsms-backend")
+  root: ""
+  # 프레임워크: spring-boot | express | nestjs | django
+  framework: "spring-boot"
+  # 언어: java | kotlin | typescript | python
+  language: "java"
+  # 빌드 명령어 (예: "./gradlew build", "mvn package")
+  buildCmd: ""
+  # 테스트 명령어 (예: "./gradlew test", "mvn test")
+  testCmd: ""
+  # 소스 루트 경로 (예: "src/main/java")
+  sourceRoot: "src/main/java"
+  # 베이스 패키지 (예: "com.riskzero.scsms")
+  basePackage: ""
+
+  # 패키지/디렉토리 구조 패턴
+  # {domain}은 도메인명 플레이스홀더 (예: user, project, safety)
+  structure:
+    # Controller 패턴 (예: "api/{group}/{domain}/controller/{Domain}Controller.java")
+    controller: ""
+    # Service 패턴 (예: "api/{group}/{domain}/service/{Domain}Service.java")
+    service: ""
+    # Mapper/Repository 패턴 (예: "api/{group}/{domain}/mapper/{Domain}Mapper.java")
+    mapper: ""
+    # DTO 패턴 (예: "api/{group}/{domain}/model/dto/{Domain}SearchDto.java")
+    dto: ""
+    # VO/Entity 패턴 (예: "api/{group}/{domain}/model/vo/{Domain}VO.java")
+    vo: ""
+    # MyBatis XML 매퍼 패턴 (예: "resources/mapper/{group}/{domain}/{Domain}Mapper.xml")
+    mapperXml: ""
+
+  # 유효성 검증 어노테이션 목록 (프레임워크에서 사용하는 검증 어노테이션)
+  validation:
+    - "@NotNull"
+    - "@NotBlank"
+    - "@NotEmpty"
+    - "@Size"
+    - "@Min"
+    - "@Max"
+    - "@Pattern"
+    - "@Email"
+    - "@Valid"
+    - "@Validated"
+
+# ------------------------------------------------------------------------------
+# 데이터베이스 설정
+# ------------------------------------------------------------------------------
+database:
+  # DB 종류: postgresql | mysql | oracle | mssql
+  type: "postgresql"
+  # DDL 파일 경로 목록 (여러 파일 지정 가능)
+  ddlPaths:
+    - ""
+
+# ------------------------------------------------------------------------------
+# 더미 데이터 설정
+# QA 및 테스트용 더미 데이터 생성 옵션
+# ------------------------------------------------------------------------------
+dummyData:
+  # 더미 데이터 생성 건수 (예: 50)
+  count: 20
+  # 파일 업로드 API 경로 (더미 파일 첨부 시 사용, 예: "/api/file/upload")
+  fileUploadApi: ""
+  # 더미 데이터 제목/이름 접두사 (예: "[테스트]")
+  prefix: "[테스트]"

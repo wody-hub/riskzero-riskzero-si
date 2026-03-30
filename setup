@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# riskzero-si setup — register skills with Claude Code
+set -e
+
+INSTALL_DIR="$(cd "$(dirname "$0")" && pwd)"
+SKILLS_DIR="$(dirname "$INSTALL_DIR")"
+
+echo "riskzero-si setup"
+echo "  install dir: $INSTALL_DIR"
+echo ""
+
+# 1. gstack 의존성 체크
+if [ ! -d "$SKILLS_DIR/gstack" ] && [ ! -L "$SKILLS_DIR/gstack" ]; then
+  echo "Error: gstack이 설치되어 있지 않습니다." >&2
+  echo "" >&2
+  echo "  gstack 먼저 설치:" >&2
+  echo "  git clone https://github.com/garrytan/gstack.git $SKILLS_DIR/gstack" >&2
+  echo "  cd $SKILLS_DIR/gstack && ./setup" >&2
+  exit 1
+fi
+
+echo "  gstack: OK"
+
+# 2. 각 riskzero-si-* 스킬 심링크 생성
+linked=()
+for skill_dir in "$INSTALL_DIR"/riskzero-si-*/; do
+  [ -f "$skill_dir/SKILL.md" ] || continue
+  skill_name="$(basename "$skill_dir")"
+  target="$SKILLS_DIR/$skill_name"
+  if [ -L "$target" ] || [ ! -e "$target" ]; then
+    ln -snf "riskzero-si/$skill_name" "$target"
+    linked+=("$skill_name")
+  fi
+done
+
+# 3. 기존 qa-checklist 심링크가 있으면 정리 (riskzero-si-qa-checklist로 통합됨)
+old_qa="$SKILLS_DIR/qa-checklist"
+if [ -L "$old_qa" ]; then
+  rm "$old_qa"
+  echo "  removed old symlink: qa-checklist (now riskzero-si-qa-checklist)"
+fi
+
+echo ""
+if [ ${#linked[@]} -gt 0 ]; then
+  echo "  linked skills: ${linked[*]}"
+fi
+
+echo ""
+echo "riskzero-si ready."
+echo ""
+echo "  사용 가능한 스킬:"
+echo "    /riskzero-si-pipeline {기능명}       — 8단계 전체 파이프라인"
+echo "    /riskzero-si-plan {기능명}           — Step 1: 구현 계획 수립"
+echo "    /riskzero-si-plan-review             — Step 2: 계획 리뷰"
+echo "    /riskzero-si-impl {기능명}           — Step 3: FE/BE 코드 구현"
+echo "    /riskzero-si-review [경로]           — Step 4: 프로젝트 표준 리뷰"
+echo "    /riskzero-si-pr-review               — Step 5: PR diff 리뷰"
+echo "    /riskzero-si-qa-checklist {기능명}   — Step 6: QA 체크리스트 생성"
+echo "    /riskzero-si-qa [URL]                — Step 7: 버그 조사 + 수정"
+echo "    /riskzero-si-browse [URL]            — Step 8: 브라우저 최종 검증"
+echo ""
+echo "  시작하기:"
+echo "    프로젝트 디렉토리에서 /riskzero-si-pipeline --init"
