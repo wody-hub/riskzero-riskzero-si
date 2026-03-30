@@ -92,7 +92,7 @@ auth:
   type: "jwt"                            # jwt | session | cookie
   loginApi: "/api/auth/login"
   loginFields:
-    id: "loginId"
+    username: "loginId"
     password: "password"
   tokenField: "accessToken"
   tokenHeader: "Authorization"
@@ -465,7 +465,7 @@ print(json.dumps(result, ensure_ascii=False, indent=2))
 # 사용자에게 테스트 계정 정보를 확인한다 (ID/PW)
 TOKEN=$(curl -s -X POST {config.server.backend.baseUrl}{config.auth.loginApi} \
   -H 'Content-Type: application/json' \
-  -d '{"{config.auth.loginFields.id}":"$ID","{config.auth.loginFields.password}":"$PW"}' \
+  -d '{"{config.auth.loginFields.username}":"$ID","{config.auth.loginFields.password}":"$PW"}' \
   | jq -r '.{config.auth.tokenField}')
 ```
 

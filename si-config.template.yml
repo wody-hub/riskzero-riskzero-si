@@ -102,13 +102,23 @@ frontend:
   fileUpload:
     # 파일 업로드 컴포넌트명 (예: "FileUpload", "DropzoneArea")
     component: ""
-    # 컴포넌트에 전달하는 주요 props 목록 (예: ["docId", "deleteFileNos", "onUploadComplete"])
-    props: []
+    # 파일 업로드 관련 props 매핑
+    props:
+      # 허용 파일 형식 prop명 (예: "accept")
+      accept: ""
+      # 최대 파일 수 prop명 (예: "maxCnt")
+      maxCount: ""
+      # 최대 파일 크기 prop명 (예: "maxSize")
+      maxSize: ""
 
   # 페이지네이션 설정
   pagination:
     # 페이지네이션 컴포넌트명 (예: "Pagination", "TablePagination")
     component: ""
+
+  # 권한 체크 패턴 (예: "auth={{ anyOf: ['C_USER'] }}")
+  auth:
+    pattern: ""
 
   # 페이지/컴포넌트 디렉토리 구조 패턴
   # {domain}은 도메인명 플레이스홀더 (예: user, project, safety)
@@ -167,6 +177,10 @@ backend:
     - "@Email"
     - "@Valid"
     - "@Validated"
+
+  # 권한 체크 패턴 (예: "@PreAuthorize(\"hasAuthority('R_XXX_LIST')\")")
+  auth:
+    pattern: ""
 
 # ------------------------------------------------------------------------------
 # 데이터베이스 설정
