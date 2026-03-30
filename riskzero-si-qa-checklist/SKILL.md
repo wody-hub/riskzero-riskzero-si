@@ -527,7 +527,7 @@ done
 
 ### 6-2. 브라우저 테스트
 
-qa-tester 에이전트 지침(`~/.claude/skills/riskzero-si-qa-checklist/qa-tester.md`)을 참조하여 브라우저 테스트를 실행한다.
+qa-tester 에이전트 지침(`riskzero-si-qa-checklist/qa-tester.md`)을 참조하여 브라우저 테스트를 실행한다.
 
 - 체크리스트 파일 경로와 대상 URL을 전달
 - 로그인 자격증명은 사용자에게 확인

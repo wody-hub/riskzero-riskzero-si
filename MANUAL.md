@@ -266,7 +266,7 @@ plan/
 **사용 예시**:
 ```bash
 /riskzero-si-review                           # 최근 변경 파일 대상
-/riskzero-si-review src/pages/safety/         # 특정 디렉토리 지정
+/riskzero-si-review src/pages/example/        # 특정 디렉토리 지정
 ```
 
 **핵심**: "우리 프로젝트 규칙을 따르는가?"를 점검합니다.
@@ -328,7 +328,7 @@ plan/
 **사용 예시**:
 ```
 /riskzero-si-qa
-/riskzero-si-qa http://localhost:3100/safety/repo
+/riskzero-si-qa http://localhost:3000/example/list
 ```
 
 **핵심 원칙**: 원인 파악 없이 코드를 수정하지 않습니다.
@@ -351,7 +351,7 @@ plan/
 **사용 예시**:
 ```
 /riskzero-si-browse
-/riskzero-si-browse http://localhost:3100/safety/repo
+/riskzero-si-browse http://localhost:3000/example/list
 ```
 
 **산출물**: `plan/{기능명}/final-report.md` + 스크린샷 파일들
@@ -381,7 +381,7 @@ plan/
 ### 리뷰어 — 코드 점검
 
 ```
-/riskzero-si-review src/pages/safety/  # 프로젝트 표준 리뷰
+/riskzero-si-review src/pages/example/ # 프로젝트 표준 리뷰
 /riskzero-si-pr-review                 # PR 안전성 리뷰
 ```
 
@@ -391,7 +391,7 @@ plan/
 
 ```
 /riskzero-si-qa-checklist 안전보건자료실   # 체크리스트 생성
-/riskzero-si-browse http://localhost:3100   # 브라우저 테스트
+/riskzero-si-browse http://localhost:3000   # 브라우저 테스트
 ```
 
 체크리스트를 자동 생성하고, 브라우저에서 검증합니다.
@@ -437,11 +437,11 @@ sources:
 ```yaml
 server:
   frontend:
-    port: 3100
-    baseUrl: "http://localhost:3100"
+    port: 3000
+    baseUrl: "http://localhost:3000"
   backend:
-    port: 8085
-    baseUrl: "http://localhost:8085"
+    port: 8080
+    baseUrl: "http://localhost:8080"
 ```
 
 #### 인증 설정
