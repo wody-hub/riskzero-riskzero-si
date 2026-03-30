@@ -418,7 +418,7 @@ plan/
 
 ```yaml
 project:
-  name: "SCSMS"                    # 프로젝트명
+  name: "MyProject"                 # 프로젝트명
   readme: "README.md"              # 코딩 규칙 문서 경로
 ```
 
