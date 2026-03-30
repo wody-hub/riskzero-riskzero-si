@@ -31,7 +31,11 @@
 ## 브라우저 도구 설정
 
 ```bash
-B=~/.claude/skills/gstack/browse/dist/browse
+if [ -x ~/.codex/skills/gstack/browse/dist/browse ]; then
+  B=~/.codex/skills/gstack/browse/dist/browse
+else
+  B=~/.claude/skills/gstack/browse/dist/browse
+fi
 ```
 
 모든 브라우저 명령은 `$B` 를 통해 실행한다.

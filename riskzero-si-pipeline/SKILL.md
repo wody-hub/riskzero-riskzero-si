@@ -49,16 +49,23 @@ si-config.yml 설정 파일이 없습니다.
   /riskzero-si-pipeline --init
 
 또는 템플릿을 직접 복사하여 작성하세요:
-  cp .claude/skills/riskzero-si/si-config.template.yml .claude/si-config.yml
+  mkdir -p .codex
+  cp ~/.codex/skills/riskzero-si/si-config.template.yml .codex/si-config.yml
+
+Claude Code를 쓰는 경우:
+  mkdir -p .claude
+  cp ~/.claude/skills/riskzero-si/si-config.template.yml .claude/si-config.yml
 ```
 
 ### 설정 파일 탐색 순서
 
 설정 파일은 다음 순서로 탐색한다. 먼저 발견된 파일을 사용한다:
 
-1. `.claude/si-config.yml` (권장 위치)
-2. `si-config.yml` (프로젝트 루트)
-3. `.claude/qa-config.yml` (QA 전용 설정 호환)
+1. `.codex/si-config.yml` (Codex 권장 위치)
+2. `.claude/si-config.yml` (Claude Code 권장 위치)
+3. `si-config.yml` (프로젝트 루트)
+4. `.codex/qa-config.yml` (QA 전용 설정 호환)
+5. `.claude/qa-config.yml` (QA 전용 설정 호환)
 
 ---
 
@@ -103,7 +110,7 @@ si-config.yml 설정 파일이 없습니다.
    - README에서 샘플 경로 언급을 찾는다
 
 6. **설정 파일 생성**
-   - 감지 결과를 si-config.template.yml 템플릿에 매핑하여 `.claude/si-config.yml`을 생성한다
+   - 감지 결과를 si-config.template.yml 템플릿에 매핑하여 Codex에서는 `.codex/si-config.yml`, Claude Code에서는 `.claude/si-config.yml`을 생성한다
    - 자동 감지가 불확실한 항목은 빈 값으로 두고 주석으로 표시한다
 
 7. **사용자 확인**

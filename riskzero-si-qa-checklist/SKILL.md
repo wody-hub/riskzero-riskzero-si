@@ -29,9 +29,11 @@ allowed-tools:
 
 아래 순서로 설정 파일을 찾는다:
 
-1. `.claude/si-config.yml` (프로젝트 루트 기준)
-2. `.claude/qa-config.yml` (프로젝트 루트 기준)
-3. `qa-config.yml` (프로젝트 루트)
+1. `.codex/si-config.yml` (프로젝트 루트 기준)
+2. `.claude/si-config.yml` (프로젝트 루트 기준)
+3. `.codex/qa-config.yml` (프로젝트 루트 기준)
+4. `.claude/qa-config.yml` (프로젝트 루트 기준)
+5. `qa-config.yml` (프로젝트 루트)
 
 찾으면 YAML 파싱하여 `config` 변수로 사용한다.
 
@@ -67,7 +69,7 @@ allowed-tools:
 
 #### 초안 생성
 
-감지 결과를 바탕으로 `.claude/qa-config.yml` 파일을 생성한다. 템플릿:
+감지 결과를 바탕으로 Codex에서는 `.codex/qa-config.yml`, Claude Code에서는 `.claude/qa-config.yml` 파일을 생성한다. 템플릿:
 
 ```yaml
 # ============================================================

@@ -1,28 +1,108 @@
 #!/usr/bin/env bash
-# riskzero-si setup — register skills with Claude Code
-set -e
+# riskzero-si setup — register skills with Codex or Claude Code
+set -euo pipefail
 
 INSTALL_DIR="$(cd "$(dirname "$0")" && pwd)"
-SKILLS_DIR="$(dirname "$INSTALL_DIR")"
+HOST=""
+
+usage() {
+  cat <<'EOF'
+Usage: ./setup [--host codex|claude]
+
+Examples:
+  ./setup --host codex
+  ./setup --host claude
+EOF
+}
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --host)
+      [ $# -ge 2 ] || {
+        echo "Error: --host requires a value" >&2
+        usage >&2
+        exit 1
+      }
+      HOST="$2"
+      shift 2
+      ;;
+    --host=*)
+      HOST="${1#*=}"
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Error: unknown argument: $1" >&2
+      usage >&2
+      exit 1
+      ;;
+  esac
+done
+
+if [ -z "$HOST" ]; then
+  case "$INSTALL_DIR" in
+    "$HOME/.codex/skills/riskzero-si"*) HOST="codex" ;;
+    "$HOME/.claude/skills/riskzero-si"*) HOST="claude" ;;
+    *)
+      echo "Error: install host를 알 수 없습니다." >&2
+      echo "" >&2
+      echo "  이 repo를 임의 경로에 clone한 경우 host를 명시해서 실행하세요." >&2
+      echo "  예:" >&2
+      echo "    ./setup --host codex" >&2
+      echo "    ./setup --host claude" >&2
+      echo "" >&2
+      usage >&2
+      exit 1
+      ;;
+  esac
+fi
+
+case "$HOST" in
+  codex) SKILLS_DIR="$HOME/.codex/skills" ;;
+  claude) SKILLS_DIR="$HOME/.claude/skills" ;;
+  *)
+    echo "Error: unsupported host '$HOST'. Use codex or claude." >&2
+    exit 1
+    ;;
+esac
+
+RUNTIME_DIR="$SKILLS_DIR/riskzero-si"
+GSTACK_DIR="$SKILLS_DIR/gstack"
+
+mkdir -p "$SKILLS_DIR"
 
 echo "riskzero-si setup"
-echo "  install dir: $INSTALL_DIR"
+echo "  host: $HOST"
+echo "  source dir: $INSTALL_DIR"
+echo "  skills dir: $SKILLS_DIR"
 echo ""
 
 # 1. gstack 의존성 체크
-if [ ! -d "$SKILLS_DIR/gstack" ] && [ ! -L "$SKILLS_DIR/gstack" ]; then
-  echo "Error: gstack이 설치되어 있지 않습니다." >&2
+if [ ! -d "$GSTACK_DIR" ] && [ ! -L "$GSTACK_DIR" ]; then
+  echo "Error: gstack이 $SKILLS_DIR 에 설치되어 있지 않습니다." >&2
   echo "" >&2
   echo "  gstack 먼저 설치:" >&2
-  echo "  git clone https://github.com/garrytan/gstack.git $SKILLS_DIR/gstack" >&2
-  echo "  cd $SKILLS_DIR/gstack && ./setup" >&2
+  echo "  git clone https://github.com/garrytan/gstack.git ~/gstack" >&2
+  echo "  cd ~/gstack && ./setup --host $HOST" >&2
   exit 1
 fi
 
 echo "  gstack: OK"
 
-# 2. 각 riskzero-si-* 스킬 심링크 생성
+# 2. runtime root 연결
+if [ "$INSTALL_DIR" != "$RUNTIME_DIR" ]; then
+  ln -snf "$INSTALL_DIR" "$RUNTIME_DIR"
+  echo "  runtime root: $RUNTIME_DIR -> $INSTALL_DIR"
+else
+  echo "  runtime root: $RUNTIME_DIR"
+fi
+
+# 3. 각 riskzero-si-* 스킬 심링크 생성
 linked=()
+skipped=()
 for skill_dir in "$INSTALL_DIR"/riskzero-si-*/; do
   [ -f "$skill_dir/SKILL.md" ] || continue
   skill_name="$(basename "$skill_dir")"
@@ -30,10 +110,12 @@ for skill_dir in "$INSTALL_DIR"/riskzero-si-*/; do
   if [ -L "$target" ] || [ ! -e "$target" ]; then
     ln -snf "riskzero-si/$skill_name" "$target"
     linked+=("$skill_name")
+  else
+    skipped+=("$skill_name")
   fi
 done
 
-# 3. 기존 qa-checklist 심링크가 있으면 정리 (riskzero-si-qa-checklist로 통합됨)
+# 4. 기존 qa-checklist 심링크가 있으면 정리 (riskzero-si-qa-checklist로 통합됨)
 old_qa="$SKILLS_DIR/qa-checklist"
 if [ -L "$old_qa" ]; then
   rm "$old_qa"
@@ -43,6 +125,9 @@ fi
 echo ""
 if [ ${#linked[@]} -gt 0 ]; then
   echo "  linked skills: ${linked[*]}"
+fi
+if [ ${#skipped[@]} -gt 0 ]; then
+  echo "  skipped existing paths: ${skipped[*]}"
 fi
 
 echo ""
