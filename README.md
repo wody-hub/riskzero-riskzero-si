@@ -105,6 +105,7 @@ Step 3(구현) ~ Step 5(PR 리뷰)만 실행한다.
 | `/riskzero-si-qa-checklist {기능명}` | Step 6 | QA 테스트 체크리스트 생성 |
 | `/riskzero-si-qa [URL]` | Step 7 | 버그 조사 + 수정 |
 | `/riskzero-si-browse [URL]` | Step 8 | 브라우저 최종 검증 |
+| `/riskzero-si-help [질문]` | — | 사용 가이드 안내 (GUIDE.md 기반 Q&A) |
 
 ## 8단계 파이프라인
 
@@ -130,7 +131,7 @@ Step 8: /riskzero-si-browse         ─ 최종 브라우저 검증
 
 | 역할 | 주로 사용하는 명령 |
 |------|------------------|
-| 신입 개발자 | `/riskzero-si-pipeline {기능명}` — 전체 자동 |
+| 신입 개발자 | `/riskzero-si-help` 로 학습 → `/riskzero-si-pipeline {기능명}` — 전체 자동 |
 | 경험 개발자 | `/riskzero-si-plan` → 직접 구현 → `/riskzero-si-review` |
 | 리뷰어 | `/riskzero-si-review` + `/riskzero-si-pr-review` |
 | QA 담당 | `/riskzero-si-qa-checklist` → `/riskzero-si-browse` |
