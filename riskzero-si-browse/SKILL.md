@@ -52,7 +52,7 @@ Skill 도구를 사용하여 `/qa-only`를 호출한다.
 gstack qa-only가 수행하는 작업:
 - QA 체크리스트 항목을 순서대로 브라우저에서 검증
 - 각 항목별 PASS/FAIL 판정
-- 스크린샷 캡처 (`plan/{기능명}/evidence/screenshots/`)
+- 스크린샷 캡처 (`.si-planning/{기능명}/evidence/screenshots/`)
 - 재현 절차(repro steps) 기록
 - health score 산출
 - 최종 리포트 생성
@@ -71,8 +71,8 @@ gstack browse가 제공하는 기능:
 
 ### 5. 최종 리포트 저장
 
-테스트 결과를 `plan/{기능명}/final-report.md`에 저장한다.
-스크린샷과 로그는 `plan/{기능명}/evidence/` 하위 디렉토리에 저장한다.
+테스트 결과를 `.si-planning/{기능명}/final-report.md`에 저장한다.
+스크린샷과 로그는 `.si-planning/{기능명}/evidence/` 하위 디렉토리에 저장한다.
 
 ```markdown
 # 최종 검증 리포트: {기능명}

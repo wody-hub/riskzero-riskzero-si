@@ -17,7 +17,7 @@ allowed-tools:
 
 ## 1. 역할
 
-`plan/{기능명}/implementation-plan.md` 구현 계획서를 기반으로 백엔드/프론트엔드 코드를 생성한다.
+`.si-planning/{기능명}/implementation-plan.md` 구현 계획서를 기반으로 백엔드/프론트엔드 코드를 생성한다.
 계획서에 명시된 태스크를 순서대로 구현하며, Ralph-loop 패턴으로 품질을 보장한다.
 
 ## 2. 설정 로드
@@ -26,9 +26,9 @@ allowed-tools:
 
 1. **si-config.yml** - 프로젝트 경로, 빌드 명령어, 프레임워크 정보
 2. **README.md** (백엔드/프론트엔드 각각) - 코딩 컨벤션, 패키지 구조, 네이밍 규칙
-3. **plan/{기능명}/discussion.md** - 설계 전 논의 결정사항
-4. **plan/{기능명}/research.md** - 계획 전 기술 리서치 결과(있으면 읽음)
-5. **plan/{기능명}/tdd-plan.md** - 구현 전에 작성해야 할 RED 테스트 케이스
+3. **.si-planning/{기능명}/discussion.md** - 설계 전 논의 결정사항
+4. **.si-planning/{기능명}/research.md** - 계획 전 기술 리서치 결과(있으면 읽음)
+5. **.si-planning/{기능명}/tdd-plan.md** - 구현 전에 작성해야 할 RED 테스트 케이스
 
 ```
 si-config.yml 주요 설정:
@@ -49,14 +49,14 @@ si-config.yml 주요 설정:
 
 ### 3.1. 태스크 추출
 
-`plan/{기능명}/implementation-plan.md` 파일에서 구현 태스크 목록을 추출한다.
+`.si-planning/{기능명}/implementation-plan.md` 파일에서 구현 태스크 목록을 추출한다.
 각 태스크는 BE/FE 구분이 명시되어 있어야 한다.
 
 먼저 `implementation-plan.md`의 "계획 전 리서치" 상태를 확인한다.
 `Status: skipped` 또는 `Status: ignored-existing`이면 `research.md`가 남아 있어도 현재 구현에는 적용하지 않고 스킵/무시 사유만 확인한다.
-그 외에는 `plan/{기능명}/research.md`가 있으면 권장 접근, 위험, 테스트/QA 관점을 먼저 반영한다.
+그 외에는 `.si-planning/{기능명}/research.md`가 있으면 권장 접근, 위험, 테스트/QA 관점을 먼저 반영한다.
 
-`plan/{기능명}/tdd-plan.md` 파일에서 RED 테스트 케이스와 실행 명령을 추출한다.
+`.si-planning/{기능명}/tdd-plan.md` 파일에서 RED 테스트 케이스와 실행 명령을 추출한다.
 `testing.tddRequired: true`인데 `tdd-plan.md`가 없거나 비어 있으면 구현을 시작하지 말고
 `/riskzero-si-plan {기능명}`을 다시 실행해 TDD 계획을 보강하도록 안내한다.
 
@@ -113,7 +113,7 @@ RED 증거를 대체하지 않는다.
 - 테스트를 실행하여 실패를 확인한다.
 - 실패는 컴파일 오류나 테스트 코드 오타가 아니라, 아직 기능이 구현되지 않았기 때문에 발생해야 한다.
 - 테스트가 바로 통과하면 기존 동작을 테스트한 것이므로 테스트를 다시 설계한다.
-- RED 결과를 `plan/{기능명}/tdd-report.md`에 기록한다.
+- RED 결과를 `.si-planning/{기능명}/tdd-report.md`에 기록한다.
 
 #### 4.3. GREEN Implement (구현)
 - 최소한의 코드 변경으로 목표를 달성한다.
@@ -170,7 +170,7 @@ RED 증거를 대체하지 않는다.
 
 ## 7. TDD 리포트 형식
 
-구현 완료 시 `plan/{기능명}/tdd-report.md`를 작성한다.
+구현 완료 시 `.si-planning/{기능명}/tdd-report.md`를 작성한다.
 
 ```markdown
 # TDD 실행 리포트: {기능명}
@@ -218,7 +218,7 @@ RED 증거를 대체하지 않는다.
 ### TDD 결과
 - RED: PASS - 기대한 실패 확인
 - GREEN: PASS - 테스트 통과
-- 리포트: plan/{기능명}/tdd-report.md
+- 리포트: .si-planning/{기능명}/tdd-report.md
 
 ### Ralph-loop 반복 횟수
 - BE: 1회 (1회차에서 통과)

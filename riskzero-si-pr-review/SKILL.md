@@ -57,7 +57,7 @@ gstack이 아래 관점에서 diff를 리뷰한다:
 
 ### 3. 리뷰 결과 저장
 
-gstack 리뷰 결과를 `plan/{기능명}/pr-review.md`에 저장한다.
+gstack 리뷰 결과를 `.si-planning/{기능명}/pr-review.md`에 저장한다.
 
 리뷰 결과에는 아래 TDD 체크를 별도 섹션으로 포함한다:
 

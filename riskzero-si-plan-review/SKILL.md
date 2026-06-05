@@ -35,11 +35,11 @@ gstack의 `/plan-eng-review` 스킬을 활용하여 아키텍처, 데이터 흐�
 
 ### 2. 계획서 확인
 
-`plan/` 디렉토리에서 가장 최근 구현 계획서를 찾는다.
-- `plan/{기능명}/implementation-plan.md`
-- `plan/{기능명}/discussion.md`
-- `plan/{기능명}/research.md` (`implementation-plan.md`가 performed/use-existing 상태일 때 읽음. skipped/ignored-existing이면 스킵/무시 사유 확인)
-- `plan/{기능명}/tdd-plan.md`
+`.si-planning/` 디렉토리에서 가장 최근 구현 계획서를 찾는다.
+- `.si-planning/{기능명}/implementation-plan.md`
+- `.si-planning/{기능명}/discussion.md`
+- `.si-planning/{기능명}/research.md` (`implementation-plan.md`가 performed/use-existing 상태일 때 읽음. skipped/ignored-existing이면 스킵/무시 사유 확인)
+- `.si-planning/{기능명}/tdd-plan.md`
 
 계획서가 없으면:
 > 구현 계획서가 없습니다. `/riskzero-si-plan {기능명}`으로 먼저 계획을 수립하세요.
@@ -78,7 +78,7 @@ gstack이 아키텍처, 데이터 흐름, 엣지 케이스, 테스트 커버리�
 
 ### 5. 통합 리뷰 결과 정리
 
-README.md 표준 체크 결과와 gstack 리뷰 결과를 통합하여 `plan/{기능명}/plan-review.md`에 저장한다.
+README.md 표준 체크 결과와 gstack 리뷰 결과를 통합하여 `.si-planning/{기능명}/plan-review.md`에 저장한다.
 
 ```markdown
 # 계획 리뷰 결과: {기능명}

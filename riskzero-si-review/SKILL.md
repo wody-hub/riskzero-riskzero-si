@@ -50,7 +50,7 @@ Read: {config.project.readme} 또는 {프로젝트 루트}/README.md
 ### 2-2b. 산출물 문서 읽기
 
 기능명이 확인되면 기능별 산출물 디렉토리에서 아래 파일을 읽는다.
-기본 경로는 `plan/{기능명}/`이며, `si-config.yml`의 `outputs` 설정이 있으면 그 값을 우선한다.
+기본 경로는 `.si-planning/{기능명}/`이며, `si-config.yml`의 `outputs` 설정이 있으면 그 값을 우선한다.
 
 - `implementation-plan.md`
 - `research.md` (있으면)

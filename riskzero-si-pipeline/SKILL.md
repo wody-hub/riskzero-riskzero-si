@@ -34,23 +34,23 @@ allowed-tools:
 
 ## 산출물 저장 계약
 
-기본 산출물 루트는 `plan/{기능명}/`이다. `si-config.yml`의 `outputs.root`와
+기본 산출물 루트는 `.si-planning/{기능명}/`이다. `si-config.yml`의 `outputs.root`와
 `outputs.featureDirPattern`이 설정되어 있으면 해당 값을 우선한다.
 
 | 구분 | 기본 경로 | 설명 |
 |------|-----------|------|
-| 설계 전 논의 | `plan/{기능명}/discussion.md` | 사용자가 결정한 gray area와 미결정/위임 항목 |
-| 계획 전 리서치 | `plan/{기능명}/research.md` | 계획 전 기술 접근, 대안, 위험 조사 결과(선택) |
-| 구현 계획 | `plan/{기능명}/implementation-plan.md` | 최종 구현 설계 |
-| TDD 계획 | `plan/{기능명}/tdd-plan.md` | RED 테스트 케이스와 실행 명령 |
-| TDD 증거 | `plan/{기능명}/tdd-report.md` | RED/GREEN/REFACTOR 실행 기록 |
-| 계획 리뷰 | `plan/{기능명}/plan-review.md` | 아키텍처/보안 계획 리뷰 |
-| 코드 리뷰 | `plan/{기능명}/code-review.md` | 프로젝트 표준 + 리서치/TDD 증거 리뷰 |
-| PR 리뷰 | `plan/{기능명}/pr-review.md` | diff 기반 안전성 리뷰 |
-| QA 체크리스트 | `plan/{기능명}/qa-checklist.md` | 기능 QA 항목 |
-| QA 리포트 | `plan/{기능명}/qa-report.md` | QA 실행 결과 |
-| 최종 리포트 | `plan/{기능명}/final-report.md` | 최종 검증 요약 |
-| 실행 증거 | `plan/{기능명}/evidence/` | 스크린샷, 로그, 테스트 결과 |
+| 설계 전 논의 | `.si-planning/{기능명}/discussion.md` | 사용자가 결정한 gray area와 미결정/위임 항목 |
+| 계획 전 리서치 | `.si-planning/{기능명}/research.md` | 계획 전 기술 접근, 대안, 위험 조사 결과(선택) |
+| 구현 계획 | `.si-planning/{기능명}/implementation-plan.md` | 최종 구현 설계 |
+| TDD 계획 | `.si-planning/{기능명}/tdd-plan.md` | RED 테스트 케이스와 실행 명령 |
+| TDD 증거 | `.si-planning/{기능명}/tdd-report.md` | RED/GREEN/REFACTOR 실행 기록 |
+| 계획 리뷰 | `.si-planning/{기능명}/plan-review.md` | 아키텍처/보안 계획 리뷰 |
+| 코드 리뷰 | `.si-planning/{기능명}/code-review.md` | 프로젝트 표준 + 리서치/TDD 증거 리뷰 |
+| PR 리뷰 | `.si-planning/{기능명}/pr-review.md` | diff 기반 안전성 리뷰 |
+| QA 체크리스트 | `.si-planning/{기능명}/qa-checklist.md` | 기능 QA 항목 |
+| QA 리포트 | `.si-planning/{기능명}/qa-report.md` | QA 실행 결과 |
+| 최종 리포트 | `.si-planning/{기능명}/final-report.md` | 최종 검증 요약 |
+| 실행 증거 | `.si-planning/{기능명}/evidence/` | 스크린샷, 로그, 테스트 결과 |
 
 기능별 산출물 디렉토리에는 아래 하위 디렉토리를 만든다:
 
@@ -183,13 +183,13 @@ Claude Code를 쓰는 경우:
 | 단계 | 스킬 명령 | 설명 | 산출물 |
 |------|-----------|------|--------|
 | 1 | `/riskzero-si-plan {기능명}` | 설계 전 논의 + 선택적 리서치 + 구현/TDD 계획 | `discussion.md`, `research.md`(선택), `implementation-plan.md`, `tdd-plan.md` |
-| 2 | `/riskzero-si-plan-review` | 논의/리서치/TDD 포함 계획 리뷰 | `plan/{기능명}/plan-review.md` |
+| 2 | `/riskzero-si-plan-review` | 논의/리서치/TDD 포함 계획 리뷰 | `.si-planning/{기능명}/plan-review.md` |
 | 3 | `/riskzero-si-impl {기능명}` | TDD 기반 FE/BE 코드 구현 | 실제 소스 파일들, `tdd-report.md` |
-| 4 | `/riskzero-si-review` | 프로젝트 표준 + 리서치/TDD 증거 리뷰 | `plan/{기능명}/code-review.md` |
-| 5 | `/riskzero-si-pr-review` | PR diff 안전성 리뷰 | `plan/{기능명}/pr-review.md` |
-| 6 | `/riskzero-si-qa-checklist {기능명}` | QA 체크리스트 생성 | `plan/{기능명}/qa-checklist.md`, `qa-report.md`(테스트 실행 시) |
+| 4 | `/riskzero-si-review` | 프로젝트 표준 + 리서치/TDD 증거 리뷰 | `.si-planning/{기능명}/code-review.md` |
+| 5 | `/riskzero-si-pr-review` | PR diff 안전성 리뷰 | `.si-planning/{기능명}/pr-review.md` |
+| 6 | `/riskzero-si-qa-checklist {기능명}` | QA 체크리스트 생성 | `.si-planning/{기능명}/qa-checklist.md`, `qa-report.md`(테스트 실행 시) |
 | 7 | `/riskzero-si-qa` | 버그 조사 및 수정 | 수정된 소스 파일들 |
-| 8 | `/riskzero-si-browse` | 브라우저 최종 검증 | `plan/{기능명}/final-report.md`, `evidence/screenshots/` |
+| 8 | `/riskzero-si-browse` | 브라우저 최종 검증 | `.si-planning/{기능명}/final-report.md`, `evidence/screenshots/` |
 
 ---
 
@@ -212,7 +212,7 @@ Claude Code를 쓰는 경우:
 ```
 
 **주의사항:**
-- `--from`으로 중간 단계부터 시작할 때, 이전 단계의 산출물(`plan/{기능명}/`)이 존재하는지 확인한다
+- `--from`으로 중간 단계부터 시작할 때, 이전 단계의 산출물(`.si-planning/{기능명}/`)이 존재하는지 확인한다
 - 산출물이 없으면 이전 단계부터 실행할 것을 권고한다
 - `--to`를 지정하면 해당 단계 완료 후 파이프라인을 중단한다
 
@@ -238,7 +238,7 @@ Claude Code를 쓰는 경우:
 - 백엔드 클래스 설계 (Controller, Service, Mapper, DTO, VO)를 작성한다
 - 구현 전에 실패해야 하는 테스트 케이스와 실행 명령을 `tdd-plan.md`에 작성한다
 
-**산출물:** `plan/{기능명}/discussion.md`, `plan/{기능명}/research.md`(선택), `plan/{기능명}/implementation-plan.md`, `plan/{기능명}/tdd-plan.md`
+**산출물:** `.si-planning/{기능명}/discussion.md`, `.si-planning/{기능명}/research.md`(선택), `.si-planning/{기능명}/implementation-plan.md`, `.si-planning/{기능명}/tdd-plan.md`
 
 **진행 조건:** 사용자가 계획을 확인하고 승인한다.
 **중단 조건:** 기획서, DDL 등 필수 입력 자료가 누락된 경우 사용자에게 경로를 확인 요청한다.
@@ -257,7 +257,7 @@ Claude Code를 쓰는 경우:
 - 유효성 검증 레이어 설계 포함 여부를 확인한다
 - 구현 전에 실패해야 하는 RED 테스트가 `tdd-plan.md`에 구체적으로 정의되었는지 확인한다
 
-**산출물:** `plan/{기능명}/plan-review.md`
+**산출물:** `.si-planning/{기능명}/plan-review.md`
 
 **진행 조건:** 리뷰 결과가 PASS이거나, 지적 사항을 1단계 계획에 반영 완료 후 재리뷰 통과.
 **중단 조건:** CRITICAL 이슈가 있으면 1단계로 되돌아가 계획을 수정한다.
@@ -278,7 +278,7 @@ Claude Code를 쓰는 경우:
 - 템플릿 마커 주석(`// ---`)을 최종 코드에서 제거한다
 - RED/GREEN/REFACTOR 실행 명령, 결과, 테스트 파일 목록을 `tdd-report.md`에 저장한다
 
-**산출물:** 실제 소스 파일들 (프로젝트 디렉토리에 직접 생성), `plan/{기능명}/tdd-report.md`
+**산출물:** 실제 소스 파일들 (프로젝트 디렉토리에 직접 생성), `.si-planning/{기능명}/tdd-report.md`
 
 **진행 조건:** 빌드(buildCmd) 성공, 린트(lintCmd) 통과.
 **중단 조건:** 빌드 또는 린트 실패 시 오류를 수정한 후 재실행. 3회 이상 실패 시 사용자에게 보고한다.
@@ -304,7 +304,7 @@ Claude Code를 쓰는 경우:
   - `tdd-plan.md`와 `tdd-report.md`가 존재하고 RED/GREEN 증거가 일치하는지 확인
   - 테스트 없이 구현된 주요 동작이 없는지 확인
 
-**산출물:** `plan/{기능명}/code-review.md`
+**산출물:** `.si-planning/{기능명}/code-review.md`
 
 **진행 조건:** 모든 항목 PASS 또는 WARNING 이하.
 **중단 조건:** ERROR 항목이 있으면 3단계 코드를 수정한 후 재리뷰한다.
@@ -324,7 +324,7 @@ Claude Code를 쓰는 경우:
   - 테스트 필요 여부
   - TDD 증거 없이 추가된 위험 동작 또는 테스트 누락
 
-**산출물:** `plan/{기능명}/pr-review.md`
+**산출물:** `.si-planning/{기능명}/pr-review.md`
 
 **진행 조건:** 리뷰 결과에 BLOCKER가 없다.
 **중단 조건:** BLOCKER 이슈가 있으면 코드를 수정한 후 재리뷰한다.
@@ -345,7 +345,7 @@ Claude Code를 쓰는 경우:
   - 에러 상황 처리 (네트워크 오류, 서버 오류)
   - 브라우저 호환성
 
-**산출물:** `plan/{기능명}/qa-checklist.md`
+**산출물:** `.si-planning/{기능명}/qa-checklist.md`
 
 **진행 조건:** 체크리스트 생성 완료. 사용자 확인.
 **중단 조건:** 없음 (항상 진행).
@@ -391,7 +391,7 @@ Claude Code를 쓰는 경우:
 4. 각 테스트 시나리오를 실행하며 스크린샷 캡처
 5. 결과를 최종 보고서에 정리
 
-**산출물:** `plan/{기능명}/final-report.md`
+**산출물:** `.si-planning/{기능명}/final-report.md`
 
 **진행 조건:** 전 항목 검증 완료.
 **중단 조건:** CRITICAL 이슈 발견 시 7단계로 되돌아간다.
@@ -407,25 +407,25 @@ Claude Code를 쓰는 경우:
 1. 논의 + 선택적 리서치 + 구현/TDD 계획 ──→ discussion.md + research.md(선택) + implementation-plan.md + tdd-plan.md
   │
   ▼
-2. 계획 리뷰 ──────→ plan/{기능명}/plan-review.md
+2. 계획 리뷰 ──────→ .si-planning/{기능명}/plan-review.md
   │                    ↑ CRITICAL 시 1단계로 복귀
   ▼
 3. TDD 코드 구현 ───→ 실제 소스 파일 + tdd-report.md
   │                    ↑ 빌드 실패 시 재시도
   ▼
-4. 표준+TDD 리뷰 ───→ plan/{기능명}/code-review.md
+4. 표준+TDD 리뷰 ───→ .si-planning/{기능명}/code-review.md
   │                    ↑ ERROR 시 3단계 코드 수정
   ▼
-5. PR 리뷰 ────────→ plan/{기능명}/pr-review.md
+5. PR 리뷰 ────────→ .si-planning/{기능명}/pr-review.md
   │                    ↑ BLOCKER 시 코드 수정
   ▼
-6. QA 체크리스트 ──→ plan/{기능명}/qa-checklist.md
+6. QA 체크리스트 ──→ .si-planning/{기능명}/qa-checklist.md
   │
   ▼
 7. 버그 수정 ──────→ 수정된 소스 파일
   │                    ↑ FAIL 항목 수정 반복
   ▼
-8. 최종 검증 ──────→ plan/{기능명}/final-report.md
+8. 최종 검증 ──────→ .si-planning/{기능명}/final-report.md
   │                    ↑ CRITICAL 시 7단계로 복귀
   ▼
 [완료]
@@ -435,11 +435,11 @@ Claude Code를 쓰는 경우:
 
 ## 출력 디렉토리 구조
 
-모든 산출물은 기본적으로 프로젝트 루트의 `plan/{기능명}/` 디렉토리에 저장된다.
+모든 산출물은 기본적으로 프로젝트 루트의 `.si-planning/{기능명}/` 디렉토리에 저장된다.
 `si-config.yml`의 `outputs` 설정이 있으면 해당 경로를 우선한다.
 
 ```
-plan/
+.si-planning/
   └── {기능명}/
       ├── discussion.md            # 1단계: 설계 전 논의 결정사항
       ├── research.md              # 1단계: 계획 전 기술 리서치(선택)

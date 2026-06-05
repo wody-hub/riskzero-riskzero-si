@@ -15,14 +15,14 @@
 ## 담당 파일 범위
 
 ### 읽기만 (참조)
-- `plan/{기능명}/qa-checklist.md` — 체크리스트 파일
+- `.si-planning/{기능명}/qa-checklist.md` — 체크리스트 파일
 - `/tmp/qa-checklist-*.md` — 과거 호환용 체크리스트 fallback
 - `{config.frontend.root}/` — 대상 화면의 프론트엔드 코드 (선택자 확인용)
 
 ### 생성 가능
-- `plan/{기능명}/evidence/screenshots/*.png` — 테스트 스크린샷
-- `plan/{기능명}/evidence/logs/*` — 실행 로그
-- `plan/{기능명}/qa-report.md` — 테스트 리포트
+- `.si-planning/{기능명}/evidence/screenshots/*.png` — 테스트 스크린샷
+- `.si-planning/{기능명}/evidence/logs/*` — 실행 로그
+- `.si-planning/{기능명}/qa-report.md` — 테스트 리포트
 
 ## 절대 수정하지 않는 파일
 - `{config.frontend.root}/` 아래 모든 소스 코드
@@ -67,9 +67,9 @@ LOG_DIR = OUTPUT_DIR/config.outputs.evidenceDir/config.outputs.logsDir
 ```
 
 `expand(...)`는 `featureDirPattern`의 `{feature}` 또는 `{기능명}`을 현재 기능명으로 치환한다.
-`outputs` 설정이 없으면 `OUTPUT_DIR=plan/{기능명}`,
-`SCREENSHOT_DIR=plan/{기능명}/evidence/screenshots`,
-`LOG_DIR=plan/{기능명}/evidence/logs`를 기본값으로 사용한다.
+`outputs` 설정이 없으면 `OUTPUT_DIR=.si-planning/{기능명}`,
+`SCREENSHOT_DIR=.si-planning/{기능명}/evidence/screenshots`,
+`LOG_DIR=.si-planning/{기능명}/evidence/logs`를 기본값으로 사용한다.
 
 ---
 

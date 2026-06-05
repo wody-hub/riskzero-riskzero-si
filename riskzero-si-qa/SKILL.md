@@ -39,7 +39,7 @@ gstack의 `/investigate`(원인 분석)와 `/qa`(수정 + 재검증)를 순차 �
 ### 2. QA 체크리스트 확인
 
 아래 위치에서 QA 체크리스트를 찾는다:
-- `plan/{기능명}/qa-checklist.md`
+- `.si-planning/{기능명}/qa-checklist.md`
 - `config.outputs`로 계산한 기능별 산출물 디렉토리의 `qa-checklist.md`
 - `/tmp/qa-checklist-*.md` (과거 호환 fallback)
 - `/tmp/qa-report-*.md` (과거 호환 fallback)
@@ -92,5 +92,5 @@ gstack qa가 수행하는 작업:
 - 수정된 파일 목록
 - 남은 이슈 (있는 경우)
 
-QA 실행 결과는 `plan/{기능명}/qa-report.md`에 저장한다.
-임시 스크린샷이나 로그를 사용했다면 최종 증거는 `plan/{기능명}/evidence/` 아래로 복사한다.
+QA 실행 결과는 `.si-planning/{기능명}/qa-report.md`에 저장한다.
+임시 스크린샷이나 로그를 사용했다면 최종 증거는 `.si-planning/{기능명}/evidence/` 아래로 복사한다.

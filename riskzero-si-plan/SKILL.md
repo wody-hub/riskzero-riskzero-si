@@ -63,16 +63,16 @@ allowed-tools:
 | `planning.requireResearchCitations` | 외부 출처 URL 기록 필수 여부 |
 | `planning.askWhenResearchExists` | 기존 research.md 처리 질문 여부 |
 
-기능별 산출물 디렉토리는 기본적으로 `plan/{기능명}/`이다.
+기능별 산출물 디렉토리는 기본적으로 `.si-planning/{기능명}/`이다.
 `config.outputs.root`와 `config.outputs.featureDirPattern`이 있으면 해당 값을 우선한다.
 계획 단계 산출물은 아래와 같다. `research.md`는 리서치를 수행한 경우에만 생성한다:
 
 | 파일 | 기본 경로 | 용도 |
 |------|-----------|------|
-| 설계 전 논의 | `plan/{기능명}/discussion.md` | gray area, 결정사항, 위임사항, deferred ideas |
-| 계획 전 리서치 | `plan/{기능명}/research.md` | 구현 계획 전에 확인한 기술 접근, 대안, 위험 |
-| 구현 계획서 | `plan/{기능명}/implementation-plan.md` | 후속 구현의 주 입력 |
-| TDD 계획 | `plan/{기능명}/tdd-plan.md` | 구현 전에 실패해야 하는 테스트 케이스와 명령 |
+| 설계 전 논의 | `.si-planning/{기능명}/discussion.md` | gray area, 결정사항, 위임사항, deferred ideas |
+| 계획 전 리서치 | `.si-planning/{기능명}/research.md` | 구현 계획 전에 확인한 기술 접근, 대안, 위험 |
+| 구현 계획서 | `.si-planning/{기능명}/implementation-plan.md` | 후속 구현의 주 입력 |
+| TDD 계획 | `.si-planning/{기능명}/tdd-plan.md` | 구현 전에 실패해야 하는 테스트 케이스와 명령 |
 
 설정에 없는 값은 README.md나 프로젝트 구조에서 추론한다.
 추론도 불가능한 경우 사용자에게 질문한다.
@@ -123,7 +123,7 @@ allowed-tools:
 
 ### 3.4. discussion.md 출력
 
-논의 결과를 아래 형식으로 `plan/{기능명}/discussion.md`에 저장한다:
+논의 결과를 아래 형식으로 `.si-planning/{기능명}/discussion.md`에 저장한다:
 
 ```markdown
 # {기능명} 설계 전 논의
@@ -249,7 +249,7 @@ allowed-tools:
 
 #### research.md 출력
 
-리서치를 수행하면 아래 형식으로 `plan/{기능명}/research.md`를 작성한다:
+리서치를 수행하면 아래 형식으로 `.si-planning/{기능명}/research.md`를 작성한다:
 
 ```markdown
 # {기능명} 계획 전 리서치
@@ -736,7 +736,7 @@ tb_main_table (1) ──── (N) tb_detail_table
 - 구현 이후 추가해도 되는 보강 테스트. 단, RED 테스트를 대체하지 않는다.
 ```
 
-이 섹션은 별도 파일 `plan/{기능명}/tdd-plan.md`에도 동일하게 저장한다.
+이 섹션은 별도 파일 `.si-planning/{기능명}/tdd-plan.md`에도 동일하게 저장한다.
 
 ### 6.10 리스크/주의사항
 
@@ -770,13 +770,13 @@ tb_main_table (1) ──── (N) tb_detail_table
 계획 단계 산출물은 다음 경로에 마크다운 파일로 저장한다:
 
 ```
-plan/{기능명}/discussion.md
-plan/{기능명}/research.md          # 리서치 수행 시 생성
-plan/{기능명}/implementation-plan.md
-plan/{기능명}/tdd-plan.md
+.si-planning/{기능명}/discussion.md
+.si-planning/{기능명}/research.md          # 리서치 수행 시 생성
+.si-planning/{기능명}/implementation-plan.md
+.si-planning/{기능명}/tdd-plan.md
 ```
 
-`plan/{기능명}/` 디렉토리가 없으면 생성한다.
+`.si-planning/{기능명}/` 디렉토리가 없으면 생성한다.
 
 ### 7.2 파일 구조
 
@@ -876,7 +876,7 @@ plan/{기능명}/tdd-plan.md
 ```
 1. si-config.yml 로드
 2. 기획서/퍼블리싱/DDL/README.md/샘플 코드 사전 스캔
-3. gray area 논의 → plan/{기능명}/discussion.md 저장
+3. gray area 논의 → .si-planning/{기능명}/discussion.md 저장
 4. 리서치 필요성 판단 → 사용자 확인 → research.md 작성 또는 스킵 사유 기록
 5. 기획서 분석 → 화면/필드/규칙 추출
 6. 퍼블리싱 분석 → 컴포넌트/UI 매핑

@@ -325,7 +325,7 @@ python-pptx를 사용하여 슬라이드에서 추출:
 
 아래 6개 카테고리로 구조화된 마크다운 파일을 생성한다.
 
-**출력 파일**: `plan/{기능명}/qa-checklist.md`
+**출력 파일**: `.si-planning/{기능명}/qa-checklist.md`
 
 `si-config.yml`의 `outputs.root`, `outputs.featureDirPattern`, `outputs.qaChecklist`가
 설정되어 있으면 해당 경로를 우선한다. `/tmp/qa-checklist-*`는 임시/호환 경로로만 사용한다.
@@ -479,10 +479,10 @@ qa-tester 에이전트 지침(`riskzero-si-qa-checklist/qa-tester.md`)을 참조
 
 브라우저 테스트 완료 후 결과를 리포트로 정리한다.
 
-**출력 파일**: `plan/{기능명}/qa-report.md`
+**출력 파일**: `.si-planning/{기능명}/qa-report.md`
 
-브라우저 테스트 증거는 `plan/{기능명}/evidence/screenshots/`,
-로그는 `plan/{기능명}/evidence/logs/` 아래에 저장한다.
+브라우저 테스트 증거는 `.si-planning/{기능명}/evidence/screenshots/`,
+로그는 `.si-planning/{기능명}/evidence/logs/` 아래에 저장한다.
 
 ```markdown
 # QA Test Report: {메뉴명}

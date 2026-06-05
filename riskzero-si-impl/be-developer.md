@@ -48,7 +48,7 @@ backend:
 - Mapper/Repository 쿼리는 프로젝트가 지원하는 통합 테스트 또는 최소한 SQL/매핑 검증 테스트로 확인한다.
 - 테스트가 기대한 이유로 실패하는 RED 상태를 확인한 뒤 구현한다.
 - 구현 후 같은 테스트가 통과하는 GREEN 상태를 확인한다.
-- RED/GREEN 명령과 결과는 `plan/{기능명}/tdd-report.md`에 기록한다.
+- RED/GREEN 명령과 결과는 `.si-planning/{기능명}/tdd-report.md`에 기록한다.
 
 ## 4. 프레임워크별 구현 패턴
 

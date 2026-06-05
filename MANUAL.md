@@ -217,14 +217,14 @@ cp ~/.claude/skills/riskzero-si/si-config.template.yml .claude/si-config.yml
 /riskzero-si-pipeline 안전보건자료실 --from=7 --to=7
 ```
 
-> **주의**: `--from`으로 중간부터 시작할 때, 이전 단계의 산출물(`plan/{기능명}/`)이 있어야 합니다.
+> **주의**: `--from`으로 중간부터 시작할 때, 이전 단계의 산출물(`.si-planning/{기능명}/`)이 있어야 합니다.
 
 ### 산출물 구조
 
-모든 산출물은 `plan/{기능명}/` 디렉토리에 저장됩니다:
+모든 산출물은 `.si-planning/{기능명}/` 디렉토리에 저장됩니다:
 
 ```
-plan/
+.si-planning/
   └── 안전보건자료실/
       ├── discussion.md            # Step 1: 설계 전 논의 결정사항
       ├── research.md              # Step 1: 계획 전 기술 리서치(선택)
@@ -272,7 +272,7 @@ plan/
 /riskzero-si-plan 안전보건자료실 --skip-research  # 리서치 강제 스킵
 ```
 
-**산출물**: `plan/안전보건자료실/discussion.md`, `research.md`(선택), `implementation-plan.md`, `tdd-plan.md`
+**산출물**: `.si-planning/안전보건자료실/discussion.md`, `research.md`(선택), `implementation-plan.md`, `tdd-plan.md`
 
 > `discussion.md`에는 설계 전 gray area 논의 결정사항이 저장됩니다.
 > `research.md`는 기술 접근, 대안, 위험, 테스트 관점을 계획 전에 조사한 경우에만 생성됩니다.
@@ -321,7 +321,7 @@ plan/
 /riskzero-si-impl 안전보건자료실 --fe-only    # 프론트엔드만
 ```
 
-**산출물**: 실제 소스 코드 파일들 + `plan/{기능명}/tdd-report.md`
+**산출물**: 실제 소스 코드 파일들 + `.si-planning/{기능명}/tdd-report.md`
 
 ---
 
@@ -428,7 +428,7 @@ plan/
 /riskzero-si-browse {si-config의 frontend.baseUrl}/목록경로
 ```
 
-**산출물**: `plan/{기능명}/final-report.md` + `plan/{기능명}/evidence/screenshots/` 스크린샷 파일들
+**산출물**: `.si-planning/{기능명}/final-report.md` + `.si-planning/{기능명}/evidence/screenshots/` 스크린샷 파일들
 
 ---
 
@@ -452,7 +452,7 @@ plan/
 - 계획서가 리서치 수행/사용 상태이면 `research.md` 권장 접근과 위험이 계획서에 반영됐는지 확인
 - 외부 리서치를 했다면 출처 URL, 확인일, 적용 판단이 `research.md`에 있는지 확인
 - 리서치를 스킵했다면 계획서에 스킵 사유가 적혀 있는지 확인
-- `plan/{기능명}/implementation-plan.md` 파일을 열어서 **API 엔드포인트 목록**이 맞는지 확인
+- `.si-planning/{기능명}/implementation-plan.md` 파일을 열어서 **API 엔드포인트 목록**이 맞는지 확인
 - `tdd-plan.md`의 RED 테스트 케이스가 핵심 동작을 포함하는지 확인
 - **테이블 매핑**이 정확한지 확인 (잘못된 컬럼 참조가 있을 수 있음)
 - **파일 배치 경로**가 프로젝트 구조와 맞는지 확인
@@ -547,7 +547,7 @@ plan/
 
 **AI가 하는 일**: 모든 체크리스트 항목을 실제 브라우저에서 검증하고, 스크린샷 + 최종 리포트를 생성합니다.
 
-**산출물**: `plan/{기능명}/final-report.md` + `plan/{기능명}/evidence/screenshots/` 스크린샷 파일들
+**산출물**: `.si-planning/{기능명}/final-report.md` + `.si-planning/{기능명}/evidence/screenshots/` 스크린샷 파일들
 
 **완료 후**: 모든 PASS이면 feature 브랜치에서 PR을 생성하여 코드 리뷰를 요청합니다.
 
@@ -746,7 +746,7 @@ orchestration:
 **대처**:
 1. 에러 메시지를 확인 — 대부분 import 누락이나 타입 불일치
 2. `--be-only` 또는 `--fe-only`로 한쪽만 먼저 완성
-3. 그래도 실패하면 계획서(`plan/{기능명}/implementation-plan.md`)의 데이터 모델을 수정 후 재구현
+3. 그래도 실패하면 계획서(`.si-planning/{기능명}/implementation-plan.md`)의 데이터 모델을 수정 후 재구현
 
 ```
 /riskzero-si-impl 안전보건자료실 --be-only    # 백엔드만 먼저
@@ -787,7 +787,7 @@ orchestration:
 **원인**: 프로젝트 README.md의 규칙과 계획서 사이의 불일치
 
 **대처**:
-1. `plan/{기능명}/plan-review.md`에서 CRITICAL 이슈 목록 확인
+1. `.si-planning/{기능명}/plan-review.md`에서 CRITICAL 이슈 목록 확인
 2. 대부분은 패키지 구조, 네이밍 규칙, 검증 레이어 누락
 3. README.md의 해당 규칙을 계획서에 반영하고 `/riskzero-si-plan`을 재실행
 

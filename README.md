@@ -157,11 +157,11 @@ Step 8: /riskzero-si-browse         ─ 최종 브라우저 검증
 
 ## 산출물 구조
 
-기본 산출물 위치는 `plan/{기능명}/`이다. `si-config.yml`의 `outputs.root`와
+기본 산출물 위치는 `.si-planning/{기능명}/`이다. `si-config.yml`의 `outputs.root`와
 `outputs.featureDirPattern`으로 변경할 수 있다.
 
 ```
-plan/
+.si-planning/
   └── {기능명}/
       ├── discussion.md
       ├── research.md              # 리서치 수행 시 생성
