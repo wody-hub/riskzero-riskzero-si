@@ -1,12 +1,7 @@
 ---
 name: riskzero-si-browse
 version: 1.0.0
-description: |
-  브라우저 기반 최종 검증. gstack browse + qa-only를 래핑한다.
-  QA 체크리스트의 모든 항목을 실제 브라우저에서 검증하고
-  스크린샷 증적과 함께 최종 리포트를 생성한다.
-  /riskzero-si-browse [URL]
-  Use when asked to "브라우저 테스트", "최종 검증", "browse", "화면 테스트".
+description: Use when running final browser verification for a riskzero-si feature, QA checklist, screenshots, or final report; triggers include "브라우저 테스트", "최종 검증", "browse", "화면 테스트".
 allowed-tools:
   - Bash
   - Read
@@ -57,7 +52,7 @@ Skill 도구를 사용하여 `/qa-only`를 호출한다.
 gstack qa-only가 수행하는 작업:
 - QA 체크리스트 항목을 순서대로 브라우저에서 검증
 - 각 항목별 PASS/FAIL 판정
-- 스크린샷 캡처 (`/tmp/qa-*.png`)
+- 스크린샷 캡처 (`plan/{기능명}/evidence/screenshots/`)
 - 재현 절차(repro steps) 기록
 - health score 산출
 - 최종 리포트 생성
@@ -77,6 +72,7 @@ gstack browse가 제공하는 기능:
 ### 5. 최종 리포트 저장
 
 테스트 결과를 `plan/{기능명}/final-report.md`에 저장한다.
+스크린샷과 로그는 `plan/{기능명}/evidence/` 하위 디렉토리에 저장한다.
 
 ```markdown
 # 최종 검증 리포트: {기능명}

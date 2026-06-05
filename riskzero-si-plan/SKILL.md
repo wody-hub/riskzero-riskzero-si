@@ -1,12 +1,7 @@
 ---
 name: riskzero-si-plan
 version: 1.0.0
-description: |
-  기획서 + 퍼블리싱 + DDL → 구현 계획서 작성.
-  화면 기획서를 분석하여 API 설계, 데이터 모델, 컴포넌트 구조,
-  파일 배치, 태스크 분해까지 포함한 구현 계획서를 생성한다.
-  /riskzero-si-plan {기능명}
-  Use when asked to "구현 계획", "implementation plan", "설계", "두뇌풀가동".
+description: Use when planning an SI feature from wireframes, publishing files, DDL, or README standards; triggers include "구현 계획", "implementation plan", "설계", "두뇌풀가동".
 allowed-tools:
   - Bash
   - Read
@@ -61,14 +56,259 @@ allowed-tools:
 | `sources.publishing` | 퍼블리싱 파일 경로(들) |
 | `sources.ddl` | DDL 파일 경로(들) |
 | `sources.sample` | 참조용 샘플 코드 경로(들) |
-| (산출물 경로) | `plan/{기능명}/` 디렉토리에 저장 |
+| `outputs.*` | 기능별 산출물 디렉토리와 문서 파일명 |
+| `planning.researchDefault` | auto / always / never |
+| `planning.externalResearchDefault` | auto / always / never |
+| `planning.externalResearchSourcePolicy` | official-first / internal-only |
+| `planning.requireResearchCitations` | 외부 출처 URL 기록 필수 여부 |
+| `planning.askWhenResearchExists` | 기존 research.md 처리 질문 여부 |
+
+기능별 산출물 디렉토리는 기본적으로 `plan/{기능명}/`이다.
+`config.outputs.root`와 `config.outputs.featureDirPattern`이 있으면 해당 값을 우선한다.
+계획 단계 산출물은 아래와 같다. `research.md`는 리서치를 수행한 경우에만 생성한다:
+
+| 파일 | 기본 경로 | 용도 |
+|------|-----------|------|
+| 설계 전 논의 | `plan/{기능명}/discussion.md` | gray area, 결정사항, 위임사항, deferred ideas |
+| 계획 전 리서치 | `plan/{기능명}/research.md` | 구현 계획 전에 확인한 기술 접근, 대안, 위험 |
+| 구현 계획서 | `plan/{기능명}/implementation-plan.md` | 후속 구현의 주 입력 |
+| TDD 계획 | `plan/{기능명}/tdd-plan.md` | 구현 전에 실패해야 하는 테스트 케이스와 명령 |
 
 설정에 없는 값은 README.md나 프로젝트 구조에서 추론한다.
 추론도 불가능한 경우 사용자에게 질문한다.
 
 ---
 
-## 3. 입력 소스 분석 (3단계)
+## 3. 설계 전 논의
+
+구현 계획서를 작성하기 전에 gsd `discuss-phase`의 핵심 흐름을 기능 단위로 적용한다.
+별도 스킬을 호출하지 않고 `/riskzero-si-plan` 안에서 수행한다.
+
+### 3.1. 사전 스캔
+
+기획서, 퍼블리싱, DDL, README.md, 샘플 코드 경로를 얕게 읽고 아래를 식별한다:
+
+- 기능 경계: 이번 기능이 실제로 제공해야 하는 화면/업무 범위
+- 확정된 요구사항: 기획서/DDL/README에서 이미 결정된 내용
+- gray area: 여러 구현 방식이 가능하고 결과가 달라지는 결정 지점
+- code context: 재사용 가능한 기존 컴포넌트, API 패턴, 권한/검증/파일 처리 규칙
+- source mismatch: 기획서/퍼블리싱/DDL 간 불일치
+
+### 3.2. gray area 후보
+
+아래처럼 기능별로 구체적인 gray area를 만든다. "UI", "UX", "API" 같은 일반
+카테고리명만 쓰지 않는다.
+
+| 후보 유형 | 예시 질문 |
+|-----------|-----------|
+| 목록/상세 흐름 | 상세 화면을 조회/수정 겸용으로 둘지, 수정 화면을 분리할지 |
+| 삭제 정책 | 물리 삭제, 논리 삭제, 복구 가능 삭제 중 무엇을 쓸지 |
+| 권한 정책 | 버튼 숨김과 API 권한 체크를 어떻게 매핑할지 |
+| 첨부파일 | 저장 전 업로드, 저장 후 연결, 임시 docId 방식 중 무엇을 쓸지 |
+| 검증 책임 | FE/BE/DB 각각 어디까지 검증할지 |
+| 검색/페이징 | 검색 조건 유지, 목록 복귀 시 페이지 유지 방식을 어떻게 할지 |
+| 불일치 처리 | 기획서와 퍼블리싱/DDL이 다를 때 무엇을 우선할지 |
+
+### 3.3. 사용자 논의
+
+1. 기능 경계와 확인된 gray area 3~5개를 제시한다.
+2. 사용자가 논의할 항목을 선택하게 한다.
+3. 각 항목마다 2~4개의 구체 선택지를 제시한다.
+4. 선택지에는 가능하면 code context를 붙인다.
+5. 사용자가 "맡김", "표준대로", "네가 결정"이라고 답하면 `Agent discretion`으로 기록한다.
+6. 기능 범위를 벗어난 아이디어는 `Deferred ideas`에 기록하고 현재 계획에는 넣지 않는다.
+
+질문은 한 번에 너무 많이 묶지 않는다. 답변이 모호하면 구현 계획에 들어가기 전에
+한 번 더 확인한다.
+
+### 3.4. discussion.md 출력
+
+논의 결과를 아래 형식으로 `plan/{기능명}/discussion.md`에 저장한다:
+
+```markdown
+# {기능명} 설계 전 논의
+
+## 기능 경계
+{이번 기능이 제공하는 범위}
+
+## 확정된 요구사항
+- {기획서/DDL/README에서 확정된 요구사항}
+
+## 논의한 결정사항
+### {gray area 이름}
+- **결정**: {사용자 선택}
+- **근거**: {선택 이유 또는 code context}
+- **구현 영향**: {API/DB/FE/QA에 미치는 영향}
+
+## Agent discretion
+- {사용자가 에이전트에게 위임한 항목}
+
+## Deferred ideas
+- {이번 기능 범위를 벗어난 아이디어}
+
+## Source mismatches
+- {기획서/퍼블리싱/DDL 불일치와 처리 결정}
+```
+
+### 3.5. 계획 전 리서치
+
+구현 계획서를 작성하기 전에 gsd `plan-phase`의 research gate를 기능 단위로 적용한다.
+별도 스킬로 나누지 않고 `/riskzero-si-plan` 안에서 수행한다.
+
+#### 리서치 옵션
+
+`/riskzero-si-plan`은 아래 플래그를 지원한다:
+
+| 옵션 | 동작 |
+|------|------|
+| `--research` | 사용자 질문 없이 리서치를 수행하고 `research.md`를 작성한다 |
+| `--skip-research` | 리서치를 건너뛰고 스킵 사유를 구현 계획서에 기록한다 |
+| 옵션 없음 | AI가 필요성을 판단한 뒤 사용자에게 진행/스킵을 질문한다 |
+
+`planning.researchDefault`가 `always`이면 `--research`처럼 동작하고, `never`이면
+`--skip-research`처럼 동작한다. 기본값 `auto`에서는 반드시 사용자에게 확인한다.
+`planning.externalResearchDefault`는 리서치를 수행하기로 한 뒤 외부 웹/문서 리서치를 포함할지 결정한다.
+값이 `auto`이면 외부 자료가 필요한지 판단해 사용자에게 확인하고, `always`이면 가능한 경우 외부 리서치를 수행하며,
+`never`이면 내부 README/샘플/기획/DDL만 사용한다.
+
+#### 리서치 필요성 판단
+
+아래 신호가 하나라도 강하면 리서치를 권장한다:
+
+- 기존 프로젝트에 없는 새 기술, 외부 API, 라이브러리, 인증/권한 방식이 필요함
+- 파일 업로드, 대량 데이터, 동시성, 권한, 보안, 배치/비동기 처리처럼 장애 영향이 큰 설계가 포함됨
+- 기획서/퍼블리싱/DDL 사이의 불일치가 설계 선택지로 이어짐
+- 유사 기능 코드가 없거나, 기존 패턴이 서로 충돌함
+- 테스트 전략을 정하기 어렵거나 fixture/환경 구성이 불명확함
+
+아래 신호가 하나라도 강하면 외부 리서치를 권장한다:
+
+- 사용 중인 프레임워크/라이브러리/API의 최신 사용법, breaking change, deprecation 확인이 필요함
+- 보안, 인증, 권한, 파일 업로드, 개인정보, 법규/표준처럼 최신 권고가 중요한 영역임
+- 내부 샘플 코드가 오래됐거나 README.md와 실제 라이브러리 버전이 충돌함
+- 에러 메시지, 브라우저/DB/빌드 도구 동작처럼 외부 공식 문서 확인이 더 정확한 판단으로 이어짐
+
+아래 조건이면 스킵을 권장할 수 있다:
+
+- 기존 CRUD 패턴을 그대로 확장하는 단순 화면
+- README.md와 샘플 코드가 충분하고 새 의존성이 없음
+- 유사 기능 코드가 명확하며 DDL/기획/퍼블리싱 불일치가 없음
+- 사용자 또는 프로젝트 표준이 이미 접근 방식을 확정함
+
+#### 사용자 확인
+
+옵션이 없고 `planning.researchDefault: auto`이면 plan 작성 전에 아래처럼 질문한다:
+
+```text
+{기능명} 구현 계획 전에 리서치를 진행할까요?
+
+추천: {Research first | Skip research}
+판단 근거:
+- {근거 1}
+- {근거 2}
+
+1. Research first — 기술 접근, 대안, 위험, 테스트 전략을 먼저 확인하고 research.md를 작성
+2. Skip research — discussion.md와 기존 프로젝트 패턴만으로 바로 계획 작성
+```
+
+리서치를 진행하기로 했고 `planning.externalResearchDefault: auto`이면 외부 리서치 포함 여부도 묻는다:
+
+```text
+외부 리서치가 필요해 보입니다. 공식 문서/표준 문서까지 확인할까요?
+
+추천: {External official research | Internal only}
+판단 근거:
+- {최신성/외부 API/보안/버전 충돌 등 근거}
+
+1. External official research — 공식 문서/표준/벤더 문서를 확인하고 URL을 research.md에 기록
+2. Internal only — README.md, 샘플 코드, 기획서, DDL만 사용
+```
+
+사용자가 `Skip research`를 선택하거나 `--skip-research`, `planning.researchDefault: never`가 적용되면
+새 `research.md`를 만들지 않는다. 대신 `implementation-plan.md`의 "계획 전 리서치" 섹션에
+`Status: skipped`와 스킵 사유를 기록한다.
+
+기존 `research.md`가 있고 `planning.askWhenResearchExists: true`이면
+`Use existing / Refresh research / Skip research` 중 하나를 질문한다.
+이때 `Skip research`를 선택하면 기존 파일을 삭제하지는 않지만 현재 계획에서는 사용하지 않는다.
+`implementation-plan.md`에는 `Status: ignored-existing`과 무시 사유를 기록하며,
+후속 구현/리뷰 스킬은 이 상태를 `research.md` 파일 존재보다 우선한다.
+`planning.askWhenResearchExists: false`이고 별도 플래그가 없으면 기존 `research.md`를 사용한다.
+
+#### 외부 리서치 원칙
+
+외부 리서치는 현재 에이전트 런타임에서 웹 검색, 브라우징, WebFetch 같은 도구가 사용 가능할 때만 수행한다.
+네트워크나 도구가 없으면 중단하지 말고 `External Research Status: unavailable`을 기록한 뒤 내부 자료 기반으로 진행한다.
+
+- 사내 기획서, DDL, 비공개 코드, 고객명, 내부 URL, 보안 토큰을 외부 검색어에 그대로 넣지 않는다.
+- 1차 출처를 우선한다: 공식 문서, 표준 문서, 벤더 릴리스 노트, API 레퍼런스, 보안 권고.
+- 블로그, Q&A, GitHub issue는 보조 출처로만 사용하고 `secondary`로 표시한다.
+- `planning.externalResearchSourcePolicy: internal-only`이면 외부 웹을 열지 않고 내부 자료만 사용한다.
+- `planning.requireResearchCitations: true`이면 외부 출처마다 URL, 문서명, 확인일, 적용 판단을 기록한다.
+- 출처 내용을 길게 복사하지 말고, 구현에 필요한 결론과 근거만 요약한다.
+
+#### research.md 출력
+
+리서치를 수행하면 아래 형식으로 `plan/{기능명}/research.md`를 작성한다:
+
+```markdown
+# {기능명} 계획 전 리서치
+
+**Researched:** {날짜}
+**Recommendation:** {권장 구현 접근}
+**Confidence:** HIGH / MEDIUM / LOW
+**Research Status:** performed / use-existing
+**External Research Status:** performed / skipped / unavailable / not-needed
+
+## Research Decision
+- **AI recommendation**: Research first / Skip research
+- **User choice**: Research first
+- **Reason**: {왜 리서치가 필요했는지}
+- **External research choice**: External official research / Internal only / Unavailable
+
+## User Constraints
+- {discussion.md에서 확정된 결정사항}
+- {Agent discretion 항목}
+- {Deferred ideas는 범위 제외로 명시}
+
+## Sources Reviewed
+- {README.md / 샘플 코드 / 유사 기능 / 공식 문서 / DDL / 퍼블리싱}
+
+## External Sources
+| Source | Type | URL | Checked at | Key finding | Applied |
+|--------|------|-----|------------|-------------|---------|
+| {문서명} | official / standard / vendor / secondary | {URL} | {YYYY-MM-DD} | {핵심 확인 내용} | Y/N + 이유 |
+
+외부 리서치를 하지 않았거나 불가능했다면 이 섹션에 `skipped`, `unavailable`, `not-needed` 중 하나와 사유를 기록한다.
+
+## Recommended Approach
+- {구현 계획에 반영해야 할 접근}
+
+## Alternatives Considered
+| 선택지 | 장점 | 단점 | 판정 |
+|--------|------|------|------|
+
+## Existing Project Patterns
+- {재사용할 Controller/Service/Mapper/FE 훅/컴포넌트 패턴}
+
+## Risks and Pitfalls
+- {구현 중 피해야 할 실수}
+
+## Test and QA Implications
+- {tdd-plan.md와 qa-checklist.md에 반영할 테스트 관점}
+
+## Open Questions
+- {리서치 후에도 남은 질문. 없으면 "없음"}
+```
+
+외부 문서/라이브러리/법규/표준처럼 최신성이 중요한 정보를 조사할 때는 반드시 현재 자료를 확인하고,
+출처나 확인 경로를 `Sources Reviewed`에 남긴다.
+
+`implementation-plan.md`는 반드시 `discussion.md`와, 존재한다면 `research.md`를 입력으로 삼아 작성한다.
+
+---
+
+## 4. 입력 소스 분석 (3단계)
 
 ### Step A: 기획서 분석
 
@@ -182,9 +422,9 @@ tb_main_table (1) ──── (N) tb_detail_table
 
 ---
 
-## 4. 기존 코드 학습
+## 5. 기존 코드 학습
 
-### 4.1 README.md 표준 파악
+### 5.1 README.md 표준 파악
 
 `config.project.readme` 경로의 README.md를 읽어서 다음을 파악한다:
 
@@ -200,7 +440,7 @@ tb_main_table (1) ──── (N) tb_detail_table
 
 **README.md에 명시된 규칙은 기존 코드 패턴보다 우선한다.**
 
-### 4.2 샘플 코드 참조
+### 5.2 샘플 코드 참조
 
 `config.sources.sample` 경로가 설정되어 있으면 해당 샘플 코드를 읽는다.
 
@@ -215,7 +455,7 @@ tb_main_table (1) ──── (N) tb_detail_table
 - 폼 처리/유효성 검증 패턴
 - 테이블/그리드 컴포넌트 사용 패턴
 
-### 4.3 유사 기능 코드 탐색
+### 5.3 유사 기능 코드 탐색
 
 `config.backend.structure`와 `config.frontend.structure` 패턴을 사용하여
 기존 코드베이스에서 유사한 기능의 코드를 탐색한다.
@@ -228,7 +468,7 @@ tb_main_table (1) ──── (N) tb_detail_table
 4. 발견된 유사 코드의 패턴을 학습하여 일관성 유지
 ```
 
-### 4.4 학습 결과 정리
+### 5.4 학습 결과 정리
 
 학습한 패턴을 다음 형식으로 정리한다:
 
@@ -252,11 +492,11 @@ tb_main_table (1) ──── (N) tb_detail_table
 
 ---
 
-## 5. 설계서 생성 (9단계)
+## 6. 설계서 생성 (10단계)
 
-분석 결과를 종합하여 아래 9개 섹션으로 구성된 구현 계획서를 생성한다.
+분석 결과를 종합하여 아래 10개 섹션으로 구성된 구현 계획서를 생성한다.
 
-### 5.1 기능 개요
+### 6.1 기능 개요
 
 ```markdown
 ## 1. 기능 개요
@@ -278,7 +518,7 @@ tb_main_table (1) ──── (N) tb_detail_table
 - [ ] 요구사항 2
 ```
 
-### 5.2 API 설계
+### 6.2 API 설계
 
 ```markdown
 ## 2. API 설계
@@ -313,7 +553,7 @@ tb_main_table (1) ──── (N) tb_detail_table
 - **Error Responses**: 400, 401, 403, 500
 ```
 
-### 5.3 데이터 모델
+### 6.3 데이터 모델
 
 ```markdown
 ## 3. 데이터 모델
@@ -334,7 +574,7 @@ tb_main_table (1) ──── (N) tb_detail_table
 - 삭제 플래그(논리 삭제) 처리 방식
 ```
 
-### 5.4 DTO 설계
+### 6.4 DTO 설계
 
 ```markdown
 ## 4. DTO 설계
@@ -354,7 +594,7 @@ tb_main_table (1) ──── (N) tb_detail_table
 {DTO에서 VO로의 변환 규칙}
 ```
 
-### 5.5 ORM/Mapper 설계
+### 6.5 ORM/Mapper 설계
 
 ```markdown
 ## 5. ORM/Mapper 설계
@@ -376,7 +616,7 @@ tb_main_table (1) ──── (N) tb_detail_table
 - 정렬 처리 방식
 ```
 
-### 5.6 FE 컴포넌트 설계
+### 6.6 FE 컴포넌트 설계
 
 ```markdown
 ## 6. FE 컴포넌트 설계
@@ -415,7 +655,7 @@ tb_main_table (1) ──── (N) tb_detail_table
 {프론트엔드 유효성 검증 규칙 목록}
 ```
 
-### 5.7 파일 배치 계획
+### 6.7 파일 배치 계획
 
 ```markdown
 ## 7. 파일 배치 계획
@@ -445,7 +685,7 @@ tb_main_table (1) ──── (N) tb_detail_table
 {신규 생성 파일과 기존 파일 수정 목록 구분}
 ```
 
-### 5.8 태스크 분해
+### 6.8 태스크 분해
 
 ```markdown
 ## 8. 태스크 분해
@@ -470,18 +710,46 @@ tb_main_table (1) ──── (N) tb_detail_table
 {텍스트 기반 의존성 그래프}
 ```
 
-### 5.9 리스크/주의사항
+### 6.9 TDD / 자동화 테스트 계획
 
 ```markdown
-## 9. 리스크/주의사항
+## 9. TDD / 자동화 테스트 계획
 
-### 9.1 기획-퍼블리싱 불일치
+### 9.1 테스트 명령
+| 영역 | 명령 | 비고 |
+|------|------|------|
+| BE | {config.backend.testCmd} | 비어 있으면 프로젝트에서 테스트 러너 탐색 |
+| FE | {config.frontend.testCmd} | 비어 있으면 package.json scripts에서 test 계열 탐색 |
+
+### 9.2 RED 테스트 케이스
+구현 전에 먼저 작성하고 실패를 확인해야 하는 테스트를 나열한다.
+
+| ID | 영역 | 테스트 파일 | 동작 | 실패해야 하는 이유 | 관련 구현 태스크 |
+|----|------|------------|------|-------------------|----------------|
+| TDD-BE-01 | BE | {path} | {행동} | 아직 API/Service가 없거나 규칙이 미구현 | Task # |
+| TDD-FE-01 | FE | {path} | {행동} | 아직 컴포넌트/훅 동작이 미구현 | Task # |
+
+### 9.3 테스트 데이터/fixture
+- {테스트에 필요한 최소 데이터}
+
+### 9.4 회귀 테스트 보강
+- 구현 이후 추가해도 되는 보강 테스트. 단, RED 테스트를 대체하지 않는다.
+```
+
+이 섹션은 별도 파일 `plan/{기능명}/tdd-plan.md`에도 동일하게 저장한다.
+
+### 6.10 리스크/주의사항
+
+```markdown
+## 10. 리스크/주의사항
+
+### 10.1 기획-퍼블리싱 불일치
 {Step A와 Step B 비교에서 발견된 불일치 목록}
 
-### 9.2 DDL-기획 불일치
+### 10.2 DDL-기획 불일치
 {DDL에 없는 필드, 타입 불일치 등}
 
-### 9.3 기술적 주의사항
+### 10.3 기술적 주의사항
 - 성능 고려 (대량 데이터, N+1 쿼리 등)
 - 동시성 처리 (낙관적 락, 비관적 락)
 - 파일 업로드 처리 (docId 연동 등)
@@ -489,25 +757,28 @@ tb_main_table (1) ──── (N) tb_detail_table
 - 트랜잭션 범위
 - 공통 코드 처리
 
-### 9.4 확인 필요 사항
+### 10.4 확인 필요 사항
 {기획서에 명확하지 않아 확인이 필요한 항목}
 ```
 
 ---
 
-## 6. 출력 형식
+## 7. 출력 형식
 
-### 6.1 출력 파일
+### 7.1 출력 파일
 
-계획서는 다음 경로에 마크다운 파일로 저장한다:
+계획 단계 산출물은 다음 경로에 마크다운 파일로 저장한다:
 
 ```
+plan/{기능명}/discussion.md
+plan/{기능명}/research.md          # 리서치 수행 시 생성
 plan/{기능명}/implementation-plan.md
+plan/{기능명}/tdd-plan.md
 ```
 
 `plan/{기능명}/` 디렉토리가 없으면 생성한다.
 
-### 6.2 파일 구조
+### 7.2 파일 구조
 
 ```markdown
 # {기능명} 구현 계획서
@@ -516,11 +787,24 @@ plan/{기능명}/implementation-plan.md
 > 기획서: {소스 파일 경로}
 > 퍼블리싱: {소스 파일 경로}
 > DDL: {소스 파일 경로}
+> 설계 전 논의: discussion.md
+> 계획 전 리서치: research.md / skipped / ignored-existing ({사유})
+> TDD 계획: tdd-plan.md
+
+---
+
+## 설계 전 논의 결정사항
+{discussion.md의 핵심 결정사항 요약}
+
+---
+
+## 계획 전 리서치
+{research.md의 핵심 권장사항, 스킵 사유, 또는 기존 research.md를 무시한 사유}
 
 ---
 
 ## 프로젝트 패턴 요약
-{4.4에서 정리한 내용}
+{5.4에서 정리한 내용}
 
 ---
 
@@ -548,26 +832,29 @@ plan/{기능명}/implementation-plan.md
 ## 8. 태스크 분해
 ...
 
-## 9. 리스크/주의사항
+## 9. TDD / 자동화 테스트 계획
+...
+
+## 10. 리스크/주의사항
 ...
 ```
 
-### 6.3 작성 원칙
+### 7.3 작성 원칙
 
 - 각 섹션에 **코드 블록**, **테이블**, **텍스트 다이어그램**을 적극 사용한다
 - API 설계에는 요청/응답 JSON 예시를 포함한다
 - DTO/VO 설계에는 필드 목록과 타입을 테이블로 정리한다
 - 쿼리 설계에는 SQL 골격을 코드 블록으로 포함한다
-- 모든 설계 항목에는 **근거** (기획서 어디, DDL 어디)를 명시한다
+- 모든 설계 항목에는 **근거**를 명시한다. 리서치 상태가 수행/사용이면 어느 research.md 권장사항인지도 함께 적는다
 
 ---
 
-## 7. 프레임워크별 분기
+## 8. 프레임워크별 분기
 
 설정 파일의 `backend.framework`와 `frontend.framework` 값에 따라
 설계 패턴을 분기한다. 아래는 주요 프레임워크별 가이드이다.
 
-### 7.1 백엔드 프레임워크 분기
+### 8.1 백엔드 프레임워크 분기
 
 #### spring-boot (Java/Kotlin)
 - **계층 구조**: Controller → Service → Mapper
@@ -601,7 +888,7 @@ plan/{기능명}/implementation-plan.md
 - **인증/인가**: Permission 클래스
 - **직렬화**: DRF Serializer
 
-### 7.2 프론트엔드 프레임워크 분기
+### 8.2 프론트엔드 프레임워크 분기
 
 #### react (CRA/Vite)
 - **컴포넌트**: 함수형 컴포넌트 + Hook
@@ -634,19 +921,19 @@ plan/{기능명}/implementation-plan.md
 
 ---
 
-## 8. 범용화 원칙
+## 9. 범용화 원칙
 
 이 스킬은 특정 프로젝트에 종속되지 않는 **범용 설계 도구**이다.
 다음 원칙을 반드시 준수한다.
 
-### 8.1 하드코딩 금지
+### 9.1 하드코딩 금지
 
 - 모든 경로, 패키지명, 클래스명 패턴은 `si-config.yml`에서 읽는다
 - config에 없으면 `README.md`에서 추론한다
 - 추론도 불가능하면 사용자에게 질문한다
 - 절대로 특정 프로젝트의 경로나 패키지를 코드에 직접 쓰지 않는다
 
-### 8.2 README.md 우선
+### 9.2 README.md 우선
 
 ```
 우선순위:
@@ -659,13 +946,13 @@ plan/{기능명}/implementation-plan.md
 README.md에 **코드 생성 가이드** 섹션이 있다면 해당 내용을 최우선으로 따른다.
 기존 코드의 패턴과 README.md 규칙이 충돌하면 README.md를 따른다.
 
-### 8.3 기존 코드 패턴 학습
+### 9.3 기존 코드 패턴 학습
 
 - 새 코드를 설계하기 전에 반드시 기존 코드를 탐색한다
 - 유사한 CRUD 기능이 있다면 그 패턴을 참고한다
 - 단, README.md 표준과 충돌하면 README.md를 따른다
 
-### 8.4 설정 누락 시 동작
+### 9.4 설정 누락 시 동작
 
 필수 설정이 누락된 경우의 동작:
 
@@ -678,7 +965,7 @@ README.md에 **코드 생성 가이드** 섹션이 있다면 해당 내용을 �
 | `frontend.framework` | README.md / package.json 등에서 추론 |
 | `project.readme` | 프로젝트 루트에서 README.md 자동 탐색 |
 
-### 8.5 다중 프로젝트 대응
+### 9.5 다중 프로젝트 대응
 
 모노레포 또는 별도 저장소 구조 모두 지원한다.
 
@@ -692,15 +979,16 @@ README.md에 **코드 생성 가이드** 섹션이 있다면 해당 내용을 �
 
 ```
 1. si-config.yml 로드
-2. README.md 읽기 → 프로젝트 표준 파악
-3. 샘플 코드 읽기 → 코드 패턴 학습
-4. 기존 유사 코드 탐색 → 패턴 보강
+2. 기획서/퍼블리싱/DDL/README.md/샘플 코드 사전 스캔
+3. gray area 논의 → plan/{기능명}/discussion.md 저장
+4. 리서치 필요성 판단 → 사용자 확인 → research.md 작성 또는 스킵 사유 기록
 5. 기획서 분석 → 화면/필드/규칙 추출
 6. 퍼블리싱 분석 → 컴포넌트/UI 매핑
 7. DDL 분석 → 테이블/컬럼/관계 추출
-8. 기획-퍼블리싱-DDL 교차 검증 → 불일치 식별
-9. 9단계 설계서 생성
-10. plan/{기능명}/implementation-plan.md 파일 출력
+8. 기존 코드 학습 → 프로젝트 패턴 정리
+9. 기획-퍼블리싱-DDL 교차 검증 → 불일치 식별
+10. 10개 섹션 구현 계획서 생성 → implementation-plan.md 저장
+11. TDD 테스트 설계 → tdd-plan.md 저장
 ```
 
 각 단계에서 판단이 어려운 사항은 사용자에게 질문하되,

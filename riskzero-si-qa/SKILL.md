@@ -1,11 +1,7 @@
 ---
 name: riskzero-si-qa
 version: 1.0.0
-description: |
-  버그 조사 및 수정. gstack investigate + qa를 래핑한다.
-  QA 체크리스트 기반으로 버그를 조사하고, 원인을 분석하여 수정한 뒤 재검증한다.
-  /riskzero-si-qa [URL]
-  Use when asked to "버그 수정", "qa", "QA", "버그 조사", "테스트 수정".
+description: Use when investigating or fixing QA failures, browser test failures, or bugs found in riskzero-si reports; triggers include "버그 수정", "qa", "QA", "버그 조사", "테스트 수정".
 allowed-tools:
   - Bash
   - Read
@@ -44,8 +40,9 @@ gstack의 `/investigate`(원인 분석)와 `/qa`(수정 + 재검증)를 순차 �
 
 아래 위치에서 QA 체크리스트를 찾는다:
 - `plan/{기능명}/qa-checklist.md`
-- `/tmp/qa-checklist-*.md`
-- `/tmp/qa-report-*.md` (이전 테스트 리포트)
+- `config.outputs`로 계산한 기능별 산출물 디렉토리의 `qa-checklist.md`
+- `/tmp/qa-checklist-*.md` (과거 호환 fallback)
+- `/tmp/qa-report-*.md` (과거 호환 fallback)
 
 체크리스트가 없으면:
 > QA 체크리스트가 없습니다. `/riskzero-si-qa-checklist {기능명}`으로 먼저 생성하세요.
@@ -76,9 +73,9 @@ gstack investigate가 4단계로 원인을 분석한다:
 
 gstack qa가 수행하는 작업:
 - 소스 코드에서 버그 수정
-- 수정 사항을 atomic commit으로 커밋
 - 수정 후 해당 항목 재검증
 - before/after 스크린샷으로 증적
+- 커밋/푸시는 사용자가 명시적으로 요청한 경우에만 수행
 
 ### 6. 반복
 
@@ -94,3 +91,6 @@ gstack qa가 수행하는 작업:
 - FAIL → PASS로 변경된 항목 표시
 - 수정된 파일 목록
 - 남은 이슈 (있는 경우)
+
+QA 실행 결과는 `plan/{기능명}/qa-report.md`에 저장한다.
+임시 스크린샷이나 로그를 사용했다면 최종 증거는 `plan/{기능명}/evidence/` 아래로 복사한다.

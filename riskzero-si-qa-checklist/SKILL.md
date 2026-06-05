@@ -1,11 +1,7 @@
 ---
 name: riskzero-si-qa-checklist
 version: 1.0.0
-description: |
-  화면 QA 체크리스트 생성 및 브라우저 테스트. 게시판형 CRUD 화면의
-  등록/수정/검색/페이징/네비게이션/삭제를 자동 분석하여 체크리스트를 생성한다.
-  더미데이터 생성과 브라우저 자동 테스트도 지원.
-  Use when asked to "화면검증", "qa checklist", "QA 체크리스트".
+description: Use when generating QA checklists or browser test plans for implemented SI screens; triggers include "화면검증", "qa checklist", "QA 체크리스트".
 allowed-tools:
   - Bash
   - Read
@@ -354,7 +350,10 @@ print(json.dumps(result, ensure_ascii=False, indent=2))
 
 아래 6개 카테고리로 구조화된 마크다운 파일을 생성한다.
 
-**출력 파일**: `/tmp/qa-checklist-{도메인}-{YYYYMMDD-HHmmss}.md`
+**출력 파일**: `plan/{기능명}/qa-checklist.md`
+
+`si-config.yml`의 `outputs.root`, `outputs.featureDirPattern`, `outputs.qaChecklist`가
+설정되어 있으면 해당 경로를 우선한다. `/tmp/qa-checklist-*`는 임시/호환 경로로만 사용한다.
 
 ### 체크리스트 구조
 
@@ -539,7 +538,10 @@ qa-tester 에이전트 지침(`riskzero-si-qa-checklist/qa-tester.md`)을 참조
 
 브라우저 테스트 완료 후 결과를 리포트로 정리한다.
 
-**출력 파일**: `/tmp/qa-report-{도메인}-{YYYYMMDD-HHmmss}.md`
+**출력 파일**: `plan/{기능명}/qa-report.md`
+
+브라우저 테스트 증거는 `plan/{기능명}/evidence/screenshots/`,
+로그는 `plan/{기능명}/evidence/logs/` 아래에 저장한다.
 
 ```markdown
 # QA Test Report: {메뉴명}

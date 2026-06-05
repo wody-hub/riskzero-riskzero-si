@@ -26,7 +26,7 @@
 
 Codex 또는 Claude Code 위에서 동작하는 **SI 프로젝트 전용 개발 파이프라인**입니다.
 
-화면 기획서(PPTX), 퍼블리싱 파일(HTML/TSX), DDL(SQL)을 입력하면 구현 계획 수립부터 코드 생성, 코드 리뷰, QA 테스트, 버그 수정, 최종 검증까지 **8단계를 자동화**합니다.
+화면 기획서(PPTX), 퍼블리싱 파일(HTML/TSX), DDL(SQL)을 입력하면 설계 전 논의, 선택적 리서치, 구현/TDD 계획 수립, 코드 생성, 코드 리뷰, QA 테스트, 버그 수정, 최종 검증까지 **8단계를 자동화**합니다.
 
 ### 전체 흐름
 
@@ -34,13 +34,13 @@ Codex 또는 Claude Code 위에서 동작하는 **SI 프로젝트 전용 개발 
 기획서 + 퍼블리싱 + DDL
         │
         ▼
-Step 1: /riskzero-si-plan           ─ 구현 계획 수립
+Step 1: /riskzero-si-plan           ─ 논의 + 선택적 리서치 + 구현/TDD 계획
         │
-Step 2: /riskzero-si-plan-review    ─ 계획 리뷰 (아키텍처/보안)
+Step 2: /riskzero-si-plan-review    ─ 논의/리서치/TDD 포함 계획 리뷰
         │
-Step 3: /riskzero-si-impl           ─ FE/BE 코드 구현
+Step 3: /riskzero-si-impl           ─ TDD 기반 FE/BE 코드 구현
         │
-Step 4: /riskzero-si-review         ─ 프로젝트 표준 리뷰
+Step 4: /riskzero-si-review         ─ 프로젝트 표준 + 리서치/TDD 증거 리뷰
         │
 Step 5: /riskzero-si-pr-review      ─ PR diff 안전성 리뷰
         │
@@ -284,12 +284,21 @@ cp ~/.claude/skills/riskzero-si/si-config.template.yml .claude/si-config.yml
 ```
 plan/
   └── 안전보건자료실/
+      ├── discussion.md            # Step 1: 설계 전 논의 결정사항
+      ├── research.md              # Step 1: 계획 전 기술 리서치(선택)
       ├── implementation-plan.md   # Step 1: 구현 계획서
+      ├── tdd-plan.md              # Step 1: TDD 테스트 설계
       ├── plan-review.md           # Step 2: 계획 리뷰 결과
+      ├── tdd-report.md            # Step 3: RED/GREEN/REFACTOR 증거
       ├── code-review.md           # Step 4: 코드 리뷰 결과
       ├── pr-review.md             # Step 5: PR 리뷰 결과
       ├── qa-checklist.md          # Step 6: QA 체크리스트
-      └── final-report.md          # Step 8: 최종 검증 보고서
+      ├── qa-report.md             # Step 6~7: QA 실행 리포트
+      ├── final-report.md          # Step 8: 최종 검증 보고서
+      └── evidence/
+          ├── screenshots/
+          ├── logs/
+          └── test-results/
 ```
 
 ---
@@ -300,7 +309,7 @@ plan/
 
 ---
 
-### Step 1: `/riskzero-si-plan {기능명}` — 구현 계획 수립
+### Step 1: `/riskzero-si-plan {기능명}` — 논의 + 선택적 리서치 + 구현/TDD 계획
 
 **입력**: 기획서(PPTX) + 퍼블리싱(HTML/TSX) + DDL(SQL)
 
@@ -309,24 +318,37 @@ plan/
 - 퍼블리싱에서 UI 컴포넌트 구조를 분석
 - DDL에서 테이블 구조, 컬럼, 관계를 분석
 - 기존 코드 패턴(README.md, 샘플 코드)을 학습
+- 설계 전 gray area를 논의하고 `discussion.md`에 결정사항을 저장
+- 리서치 필요성을 판단해 사용자에게 진행/스킵을 묻고, 진행 시 `research.md`에 결과를 저장
 - API 설계, 데이터 모델, 컴포넌트 구조, 파일 배치, 태스크 분해를 포함한 구현 계획서 생성
+- 구현 전 RED 테스트 케이스와 실행 명령을 `tdd-plan.md`에 저장
 
 **사용 예시**:
 ```
 /riskzero-si-plan 안전보건자료실
+/riskzero-si-plan 안전보건자료실 --research       # 리서치 강제 진행
+/riskzero-si-plan 안전보건자료실 --skip-research  # 리서치 강제 스킵
 ```
 
-**산출물**: `plan/안전보건자료실/implementation-plan.md`
+**산출물**: `plan/안전보건자료실/discussion.md`, `research.md`(선택), `implementation-plan.md`, `tdd-plan.md`
+
+> `discussion.md`에는 설계 전 gray area 논의 결정사항이 저장됩니다.
+> `research.md`는 기술 접근, 대안, 위험, 테스트 관점을 계획 전에 조사한 경우에만 생성됩니다.
+> 외부 리서치를 수행하면 공식 문서/표준/벤더 문서를 우선 확인하고, URL/확인일/적용 판단을 `research.md`에 남깁니다.
+> 네트워크나 웹 도구가 없으면 `External Research Status: unavailable`로 기록하고 내부 자료 기반으로 진행합니다.
+> 기존 `research.md`를 사용하지 않기로 하면 계획서에 `ignored-existing` 상태와 사유가 남고, 후속 단계는 그 상태를 우선합니다.
+> `tdd-plan.md`에는 구현 전에 실패를 확인해야 하는 RED 테스트 케이스가 저장됩니다.
 
 ---
 
-### Step 2: `/riskzero-si-plan-review` — 계획 리뷰
+### Step 2: `/riskzero-si-plan-review` — 논의/리서치/TDD 포함 계획 리뷰
 
-**입력**: Step 1에서 생성된 구현 계획서
+**입력**: Step 1에서 생성된 `discussion.md`, `research.md`(있으면), `implementation-plan.md`, `tdd-plan.md`
 
 **하는 일**:
 - 프로젝트 README.md 표준 준수 여부 사전 체크 (패키지 구조, 네이밍, API 설계, 보안, 검증)
 - 아키텍처, 데이터 흐름, 엣지 케이스, 보안 설계를 점검
+- `discussion.md` 결정사항, `research.md` 권장사항/스킵 사유, `tdd-plan.md` RED 테스트 구체성을 확인
 - PASS / WARN / FAIL 판정
 
 **사용 예시**:
@@ -340,14 +362,15 @@ plan/
 
 ---
 
-### Step 3: `/riskzero-si-impl {기능명}` — FE/BE 코드 구현
+### Step 3: `/riskzero-si-impl {기능명}` — TDD 기반 FE/BE 코드 구현
 
-**입력**: 승인된 구현 계획서
+**입력**: 승인된 구현 계획서 + `research.md`(있으면) + `tdd-plan.md`
 
 **하는 일**:
 - 계획서를 기반으로 백엔드(Controller, Service, Mapper, DTO, VO) 생성
 - 프론트엔드(목록 페이지, 상세 페이지, API 훅) 생성
-- Ralph-loop 패턴으로 구현 → 빌드 검증 → 자체 점검 반복 (최대 3회)
+- 테스트 먼저 작성 → RED 확인 → 최소 구현 → GREEN 확인 → 리팩터링
+- Ralph-loop 패턴으로 빌드/린트/테스트 검증과 자체 점검 반복 (최대 3회)
 
 **옵션**:
 ```bash
@@ -356,11 +379,11 @@ plan/
 /riskzero-si-impl 안전보건자료실 --fe-only    # 프론트엔드만
 ```
 
-**산출물**: 실제 소스 코드 파일들
+**산출물**: 실제 소스 코드 파일들 + `plan/{기능명}/tdd-report.md`
 
 ---
 
-### Step 4: `/riskzero-si-review [경로]` — 프로젝트 표준 리뷰
+### Step 4: `/riskzero-si-review [경로]` — 프로젝트 표준 + 리서치/TDD 증거 리뷰
 
 **입력**: Step 3에서 생성된 코드 (또는 지정된 파일/디렉토리)
 
@@ -368,6 +391,8 @@ plan/
 - **아키텍처 점검**: 레이어 분리, 패키지 구조, 트랜잭션 설계, 보안 취약점
 - **코딩 컨벤션 점검**: 네이밍 규칙, 코드 스타일, 미사용 변수, DTO/VO 분리
 - **API 설계 점검**: REST URI, HTTP 메서드, 응답 형식, 데이터 모델 일관성
+- **리서치 반영 점검**: 계획서가 리서치 수행/사용 상태이면 `research.md` 권장 접근과 위험 경고가 코드에 반영됐는지 확인
+- **TDD 증거 점검**: `tdd-plan.md`와 `tdd-report.md`의 RED/GREEN 기록 확인
 - README.md에서 프로젝트별 규칙을 동적으로 읽어 적용
 
 **사용 예시**:
@@ -461,7 +486,7 @@ plan/
 /riskzero-si-browse {si-config의 frontend.baseUrl}/목록경로
 ```
 
-**산출물**: `plan/{기능명}/final-report.md` + 스크린샷 파일들
+**산출물**: `plan/{기능명}/final-report.md` + `plan/{기능명}/evidence/screenshots/` 스크린샷 파일들
 
 ---
 
@@ -469,22 +494,30 @@ plan/
 
 각 단계에서 AI가 어떤 질문을 하고, 무엇을 확인해야 하는지 안내합니다.
 
-### Step 1: 구현 계획 — "계획서를 꼼꼼히 읽어라"
+### Step 1: 논의/리서치/구현 계획 — "계획서를 꼼꼼히 읽어라"
 
-**AI가 하는 일**: 기획서/퍼블리싱/DDL을 분석하여 API 설계, 데이터 모델, 컴포넌트 구조, 파일 배치, 태스크 분해를 포함한 계획서를 작성합니다.
+**AI가 하는 일**: 기획서/퍼블리싱/DDL/README를 사전 스캔해 설계 전 논의가 필요한 gray area를 정리하고, 리서치 필요성을 판단해 사용자에게 묻습니다. 결정사항과 research 결과 또는 스킵 사유를 반영해 API 설계, 데이터 모델, 컴포넌트 구조, 파일 배치, 태스크 분해, TDD 계획을 작성합니다.
 
 **AI가 물어보는 것**:
 - "기획서에 {기능}의 상세 동작이 명시되어 있지 않습니다. 어떻게 처리할까요?"
 - "DDL에 {테이블}이 없습니다. 새로 생성해야 하나요?"
+- "첨부파일/권한/삭제 정책은 프로젝트 표준대로 위임할까요, 아니면 이번 기능에서 별도 결정할까요?"
+- "이 기능은 외부 API/새 패턴이 있어 리서치를 권장합니다. 진행할까요, 스킵할까요?"
+- "외부 공식 문서까지 확인할까요, 아니면 내부 README/샘플 코드만 기준으로 계획할까요?"
 
 **확인 포인트**:
+- `discussion.md`의 결정사항이 계획서에 반영됐는지 확인
+- 계획서가 리서치 수행/사용 상태이면 `research.md` 권장 접근과 위험이 계획서에 반영됐는지 확인
+- 외부 리서치를 했다면 출처 URL, 확인일, 적용 판단이 `research.md`에 있는지 확인
+- 리서치를 스킵했다면 계획서에 스킵 사유가 적혀 있는지 확인
 - `plan/{기능명}/implementation-plan.md` 파일을 열어서 **API 엔드포인트 목록**이 맞는지 확인
+- `tdd-plan.md`의 RED 테스트 케이스가 핵심 동작을 포함하는지 확인
 - **테이블 매핑**이 정확한지 확인 (잘못된 컬럼 참조가 있을 수 있음)
 - **파일 배치 경로**가 프로젝트 구조와 맞는지 확인
 
-### Step 2: 계획 리뷰 — "FAIL이면 수정 요청"
+### Step 2: 계획+TDD 리뷰 — "FAIL이면 수정 요청"
 
-**AI가 하는 일**: 계획서를 아키텍처/보안/표준 관점에서 검토하고 PASS/WARN/FAIL 판정합니다.
+**AI가 하는 일**: 논의 결정사항, 리서치 반영/스킵 사유, TDD 계획, 아키텍처/보안/표준 관점을 함께 검토하고 PASS/WARN/FAIL 판정합니다.
 
 **결과별 대응**:
 - **PASS**: 바로 Step 3으로 진행
@@ -493,7 +526,8 @@ plan/
 
 ### Step 3: 코드 구현 — "빌드 성공이 기본"
 
-**AI가 하는 일**: 계획서 기반으로 BE/FE 코드를 생성하고, 빌드 검증을 반복합니다 (Ralph-loop, 최대 3회).
+**AI가 하는 일**: `tdd-plan.md` 기준으로 테스트를 먼저 작성해 RED 실패를 확인하고,
+최소 구현으로 GREEN을 만든 뒤 빌드/린트/테스트 검증을 반복합니다 (TDD + Ralph-loop, 최대 3회).
 
 **AI가 물어보는 것**:
 - "기존 파일 {파일명}이 이미 존재합니다. 덮어쓸까요?"
@@ -501,18 +535,50 @@ plan/
 
 **확인 포인트**:
 - 빌드가 성공하는지 확인 (빌드 실패 시 AI가 자동 수정 시도)
+- `tdd-report.md`에 RED/GREEN 실행 결과가 남았는지 확인
 - 생성된 파일 목록이 계획서의 파일 배치와 일치하는지 확인
 - 코드 스타일이 프로젝트 규칙과 맞는지 눈으로 한번 확인
 
 ### Step 4~5: 리뷰 — "두 가지 관점"
 
-**Step 4 (표준 리뷰)**: "우리 프로젝트 규칙을 따르는가?" — 네이밍, 패키지 구조, API 설계 등
+**Step 4 (표준+TDD 리뷰)**: "우리 프로젝트 규칙을 따르고, 리서치/TDD 증거가 맞는가?" — 네이밍, 패키지 구조, API 설계, RED/GREEN 기록 등
 **Step 5 (PR 리뷰)**: "코드가 안전한가?" — SQL injection, XSS, N+1 쿼리 등
 
 **확인 포인트**:
 - 지적된 이슈 중 **CRITICAL/HIGH**는 반드시 수정
+- TDD 증거 누락 이슈는 테스트 작성 또는 예외 사유 기록으로 해소
 - MEDIUM 이하는 판단하여 수정 여부 결정
 - 수정 후 해당 리뷰를 다시 실행하여 이슈 해소 확인
+
+### 모델/멀티 에이전트 운영 — "병렬화는 독립 작업에만"
+
+**가능한 방식**:
+- Codex: 현재 세션의 subagent 도구가 있으면 독립 리서치, BE/FE 분리 구현, 리뷰, QA 증거 수집을 병렬 위임할 수 있습니다. 단, 인라인 모델 지정은 런타임이 지원할 때만 가능합니다.
+- Claude Code: custom subagent의 `model` frontmatter로 `opus`, `sonnet`, `haiku` 또는 모델 ID를 지정할 수 있습니다. background subagent와 `--agent` 실행도 사용할 수 있습니다.
+- Claude Code Dynamic Workflows: Max/Team/Enterprise 등 지원 플랜과 설정이 있으면 대규모 병렬 작업에 사용할 수 있습니다. research preview 기능이므로 비용과 토큰 사용량을 확인하고 시작해야 합니다.
+
+**권장 라우팅**:
+| 단계 | 추천 |
+|------|------|
+| Step 1 계획/외부 리서치 | Claude Opus급 또는 Codex high reasoning. 외부 리서치는 read-only subagent에 위임 가능 |
+| Step 2 계획 리뷰 | Claude Opus급 또는 Codex review. 설계 반례/보안/TDD 누락 점검 |
+| Step 3 구현 | Codex 중심. BE/FE 파일 범위가 분리될 때만 subagent 병렬화 |
+| Step 4 코드 리뷰 | Codex review + Claude 교차 검토 |
+| Step 5 PR 리뷰 | Codex review |
+| Step 6 QA 체크리스트 | Claude/Codex 모두 가능. 브라우저 실행은 gstack browse |
+| Step 7 QA 수정 | Codex 중심. 재현→수정→검증 루프 |
+| Step 8 최종 검증 | Codex + gstack browser |
+
+**Dynamic Workflow를 쓰기 좋은 경우**:
+- 여러 도메인/화면/모듈을 동시에 조사해야 하는 대규모 기능
+- 보안/성능/죽은 코드/마이그레이션처럼 독립 검증이 많은 작업
+- BE/FE/DB/QA가 서로 분리된 파일 집합으로 나뉘고, 마지막 통합자가 명확한 경우
+
+**쓰면 위험한 경우**:
+- 설계 전 논의처럼 사용자의 의사결정이 자주 필요한 단계
+- 같은 파일을 여러 에이전트가 동시에 수정할 가능성이 큰 단계
+- 권한/결제/운영 데이터처럼 실수 비용이 큰 변경
+- 작은 CRUD 한두 화면처럼 병렬화 비용이 이득보다 큰 작업
 
 ### Step 6: QA 체크리스트 — "서버가 떠 있어야 한다"
 
@@ -539,7 +605,7 @@ plan/
 
 **AI가 하는 일**: 모든 체크리스트 항목을 실제 브라우저에서 검증하고, 스크린샷 + 최종 리포트를 생성합니다.
 
-**산출물**: `plan/{기능명}/final-report.md` + `/tmp/qa-*.png` 스크린샷 파일들
+**산출물**: `plan/{기능명}/final-report.md` + `plan/{기능명}/evidence/screenshots/` 스크린샷 파일들
 
 **완료 후**: 모든 PASS이면 feature 브랜치에서 PR을 생성하여 코드 리뷰를 요청합니다.
 
@@ -568,7 +634,7 @@ plan/
 ### 리뷰어 — 코드 점검
 
 ```
-/riskzero-si-review src/pages/example/ # 프로젝트 표준 리뷰
+/riskzero-si-review src/pages/example/ # 표준+TDD 증거 리뷰
 /riskzero-si-pr-review                 # PR 안전성 리뷰
 ```
 
@@ -695,6 +761,37 @@ database:
   ddlPaths:
     - "db/ddl/postgres-ddl.sql"
 ```
+
+#### 리서치/TDD/오케스트레이션 설정
+
+```yaml
+planning:
+  researchDefault: "auto"                 # auto | always | never
+  externalResearchDefault: "auto"         # auto | always | never
+  externalResearchSourcePolicy: "official-first" # official-first | internal-only
+  requireResearchCitations: true
+  askWhenResearchExists: true
+
+testing:
+  tddRequired: true
+  regressionAfterAllowed: true
+  evidenceRequired: true
+
+orchestration:
+  mode: "inline"                          # inline | subagents | dynamic-workflow
+  requireUserGate: true
+  allowParallelReadOnly: true
+  allowParallelWrites: false
+  modelRouting: "auto"
+  dynamicWorkflowDefault: "ask"           # ask | never | allowed
+  writePolicy:
+    subagentDefault: "read-only"
+    requireIsolatedRootsForParallelWrites: true
+    sharedFilesRequireInlineOwner: true
+```
+
+> `orchestration.*`은 권장 실행 전략입니다. Codex/Claude Code 런타임이 해당 기능이나 모델 지정을 지원하지 않으면 현재 에이전트가 inline으로 진행합니다.
+> subagent나 Dynamic Workflow는 단계 내부 보조자이며, 다음 단계 진행 여부와 최종 PASS/FAIL 판정은 현재 파이프라인 오너가 결정합니다.
 
 ---
 
@@ -840,10 +937,10 @@ Claude Code를 쓰면 마지막 명령만 `./setup --host claude`로 바꾸면 �
 │ /riskzero-si-pipeline --init     │ 프로젝트 초기 설정          │
 │ /riskzero-si-pipeline --from=N   │ N단계부터 실행             │
 ├──────────────────────────────────┼──────────────────────────┤
-│ /riskzero-si-plan {기능명}        │ Step 1: 구현 계획          │
-│ /riskzero-si-plan-review         │ Step 2: 계획 리뷰          │
-│ /riskzero-si-impl {기능명}        │ Step 3: 코드 구현          │
-│ /riskzero-si-review [경로]        │ Step 4: 표준 리뷰          │
+│ /riskzero-si-plan {기능명}        │ Step 1: 논의+리서치+계획   │
+│ /riskzero-si-plan-review         │ Step 2: 계획+TDD 리뷰      │
+│ /riskzero-si-impl {기능명}        │ Step 3: TDD 구현           │
+│ /riskzero-si-review [경로]        │ Step 4: 표준+TDD 리뷰      │
 │ /riskzero-si-pr-review           │ Step 5: PR 리뷰           │
 │ /riskzero-si-qa-checklist {기능명} │ Step 6: QA 체크리스트      │
 │ /riskzero-si-qa [URL]            │ Step 7: 버그 수정          │

@@ -18,6 +18,7 @@ backend:
   basePackage: com.example.project  # 베이스 패키지/모듈
   root: ./backend                    # 백엔드 소스 루트
   buildCmd: ./gradlew build          # 빌드 명령어
+  testCmd: ./gradlew test            # 테스트 명령어
   structure: layered | hexagonal     # 아키텍처 패턴
 ```
 
@@ -38,9 +39,20 @@ backend:
 `config.sources.sample`이 정의되어 있으면 해당 경로의 샘플 코드를 읽는다.
 샘플 코드의 구조, 네이밍, 패턴을 그대로 따라 일관성을 유지한다.
 
-## 3. 프레임워크별 구현 패턴
+## 3. TDD 원칙
 
-### 3.1. Spring Boot (Java/Kotlin)
+백엔드 production code 작성 전에 `tdd-plan.md`의 BE 테스트를 먼저 작성한다.
+
+- Controller/API 동작은 가능하면 HTTP 레벨 테스트(MockMvc, Supertest, DRF APIClient 등)로 검증한다.
+- Service 비즈니스 규칙은 Service 단위 테스트로 검증한다.
+- Mapper/Repository 쿼리는 프로젝트가 지원하는 통합 테스트 또는 최소한 SQL/매핑 검증 테스트로 확인한다.
+- 테스트가 기대한 이유로 실패하는 RED 상태를 확인한 뒤 구현한다.
+- 구현 후 같은 테스트가 통과하는 GREEN 상태를 확인한다.
+- RED/GREEN 명령과 결과는 `plan/{기능명}/tdd-report.md`에 기록한다.
+
+## 4. 프레임워크별 구현 패턴
+
+### 4.1. Spring Boot (Java/Kotlin)
 
 #### 레이어 구조
 ```
@@ -96,7 +108,7 @@ README.md의 보안 패턴을 따른다:
 @PreAuthorize("hasAuthority('R_XXX_LIST')")
 ```
 
-### 3.2. Express / NestJS (TypeScript)
+### 4.2. Express / NestJS (TypeScript)
 
 #### 레이어 구조
 ```
@@ -121,7 +133,7 @@ Service 레이어에서 트랜잭션 관리:
 - Prisma: `prisma.$transaction()`
 - Sequelize: `sequelize.transaction()`
 
-### 3.3. Django (Python)
+### 4.3. Django (Python)
 
 #### 레이어 구조
 ```
@@ -142,39 +154,39 @@ def service_method(self):
     ...
 ```
 
-## 4. 공통 원칙 (프레임워크 무관)
+## 5. 공통 원칙 (프레임워크 무관)
 
-### 4.1. 레이어 분리 엄수
+### 5.1. 레이어 분리 엄수
 - Controller/View: 요청 수신, 응답 반환만 담당
 - **Controller에 비즈니스 로직을 절대 작성하지 않는다**
 - Service: 비즈니스 로직, 트랜잭션 관리
 - Repository/Mapper: 데이터 접근만 담당
 
-### 4.2. 트랜잭션은 Service 레벨에서만
+### 5.2. 트랜잭션은 Service 레벨에서만
 - Controller/View에서 트랜잭션 선언 금지
 - Repository/Mapper에서 트랜잭션 선언 금지
 - 여러 테이블을 변경하는 경우 반드시 하나의 Service 메서드에서 트랜잭션 관리
 
-### 4.3. 입력 검증 3계층
+### 5.3. 입력 검증 3계층
 1. **DTO 레벨**: Bean Validation / 데코레이터로 형식 검증
 2. **Validator 레벨**: 복합 조건, 비즈니스 규칙 검증 (README.md에 Validator 패턴이 있으면 따르기)
 3. **Service 레벨**: 데이터 존재 여부, 권한, 상태 검증
 
-### 4.4. 에러 처리
+### 5.4. 에러 처리
 - 프로젝트의 커스텀 예외 클래스를 사용한다 (README.md에서 예외 클래스명 학습)
 - RFC 7807 Problem Details 형식을 따른다 (프로젝트에서 지원하는 경우)
 - 예외 메시지는 사용자에게 노출 가능한 수준으로 작성
 
-### 4.5. 인증/인가
+### 5.5. 인증/인가
 - README.md의 보안 패턴을 따른다
 - 현재 사용자 정보 획득: README.md에 명시된 유틸/헬퍼 사용
 - 권한 체크: README.md에 명시된 어노테이션/데코레이터/미들웨어 사용
 
-### 4.6. 응답 형식
+### 5.6. 응답 형식
 - README.md에 명시된 응답 래퍼/포맷을 따른다
 - HTTP 상태 코드를 적절히 사용한다 (200, 201, 204, 400, 401, 403, 404, 500)
 
-## 5. 담당 파일 범위
+## 6. 담당 파일 범위
 
 `config.backend.root` 하위 파일만 생성/수정한다.
 
@@ -184,7 +196,7 @@ config.backend.root = ./my-backend
 → ./my-backend/src/** 만 작업 가능
 ```
 
-## 6. 절대 수정 금지
+## 7. 절대 수정 금지
 
 `config.frontend.root` 하위 파일은 절대 수정하지 않는다.
 프론트엔드 코드는 fe-developer가 담당한다.

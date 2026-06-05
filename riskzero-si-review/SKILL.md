@@ -1,13 +1,7 @@
 ---
 name: riskzero-si-review
 version: 1.0.0
-description: |
-  README.md 기반 프로젝트 표준 코드 리뷰.
-  아키텍처, 코딩 컨벤션, API 설계 3개 영역을 통합 점검한다.
-  gstack /review와 상호보완: 이 스킬은 "우리 규칙을 따르는가?",
-  gstack /review는 "코드가 안전한가?"를 점검한다.
-  /riskzero-si-review [파일/디렉토리...]
-  Use when asked to "코드 리뷰", "표준 점검", "컨벤션 체크", "review convention".
+description: Use when reviewing generated code against project README standards, architecture, conventions, API design, or TDD evidence; triggers include "코드 리뷰", "표준 점검", "컨벤션 체크".
 allowed-tools:
   - Bash
   - Read
@@ -24,7 +18,9 @@ allowed-tools:
 15년차 시니어 개발자 관점의 **프로젝트 표준 코드 리뷰어**로서 행동한다.
 코드를 **수정하지 않으며**, 오직 리뷰 결과만 출력한다.
 README.md에 정의된 프로젝트 고유 규칙을 동적으로 학습하여,
-해당 규칙 대비 코드의 적합성을 아키텍처 / 코딩 컨벤션 / API 설계 3개 영역으로 나누어 점검한다.
+해당 규칙 대비 코드의 적합성을 아키텍처 / 코딩 컨벤션 / API 설계 / TDD 증거 4개 영역으로 나누어 점검한다.
+`implementation-plan.md`가 리서치 수행 또는 기존 리서치 사용 상태이면
+`research.md`의 권장 접근과 위험 경고가 코드와 테스트 증거에 반영되었는지도 함께 본다.
 
 ---
 
@@ -50,6 +46,22 @@ Read: 발견된 si-config.yml
 ```
 Read: {config.project.readme} 또는 {프로젝트 루트}/README.md
 ```
+
+### 2-2b. 산출물 문서 읽기
+
+기능명이 확인되면 기능별 산출물 디렉토리에서 아래 파일을 읽는다.
+기본 경로는 `plan/{기능명}/`이며, `si-config.yml`의 `outputs` 설정이 있으면 그 값을 우선한다.
+
+- `implementation-plan.md`
+- `research.md` (있으면)
+- `tdd-plan.md`
+- `tdd-report.md`
+
+`implementation-plan.md`의 리서치 상태가 `skipped` 또는 `ignored-existing`이면 스킵/무시 사유를 확인하고 research 반영 점검은 N/A로 둔다.
+그 외에 `research.md`가 있으면 권장 접근, 위험, 테스트/QA 관점이 코드와 `tdd-report.md`에 반영됐는지 확인한다.
+외부 리서치가 `performed`이면 URL, 확인일, 출처 유형, 적용 판단이 있는지 확인하고
+공식/표준/벤더 문서가 아닌 보조 출처만으로 설계가 결정되지 않았는지 점검한다.
+`testing.evidenceRequired: true`인데 `tdd-plan.md` 또는 `tdd-report.md`가 없으면 High 이상 이슈로 기록한다.
 
 ### 2-3. README.md에서 프로젝트 표준 규칙 동적 학습
 
@@ -285,7 +297,39 @@ gstack /review: "코드가 안전한가?"
 
 ---
 
-## 8. 출력 형식
+## 8. 점검 영역 4: TDD / 자동화 테스트 증거
+
+superpowers `test-driven-development` 원칙을 riskzero-si 구현 결과에 맞게 점검한다.
+
+### 8-1. RED/GREEN 증거
+
+- `tdd-plan.md`에 구현 전 작성해야 할 테스트 케이스가 있는가?
+- `tdd-report.md`에 RED 실행 명령과 기대 실패 결과가 기록되어 있는가?
+- RED 실패가 테스트 코드 오류가 아니라 미구현 동작 때문에 발생했는가?
+- 같은 테스트가 구현 후 GREEN으로 전환된 기록이 있는가?
+
+### 8-2. 테스트 품질
+
+- 테스트 이름이 실제 기대 동작을 설명하는가?
+- mock 호출 횟수만 검증하지 않고 사용자/API/비즈니스 동작을 검증하는가?
+- 핵심 BE/FE 동작이 테스트 계획과 연결되어 있는가?
+- 테스트 명령(`backend.testCmd`, `frontend.testCmd`)이 실행 가능한가?
+
+### 8-3. 판정 반영
+
+- TDD 증거가 없고 `testing.evidenceRequired: true`이면 최소 High 이슈로 분류한다.
+- production code가 추가됐는데 해당 동작의 RED/GREEN 증거가 없으면 High 또는 Critical로 분류한다.
+- 기존 코드 수정 없이 설정/문서만 바꾼 경우에는 TDD 예외로 기록할 수 있다.
+
+### 8-4. 외부 리서치 증거
+
+- `research.md`의 `External Research Status`가 `performed`이면 `External Sources` 표가 있는가?
+- 각 외부 출처에 URL, 확인일, 출처 유형, 적용 판단이 있는가?
+- 최신성이 중요한 설계가 보조 출처만으로 결정되지 않았는가?
+
+---
+
+## 9. 출력 형식
 
 리뷰 결과는 반드시 아래 마크다운 형식으로 출력한다.
 
@@ -327,17 +371,23 @@ gstack /review: "코드가 안전한가?"
 #### Issue #N: {제목}
 - (동일 형식)
 
+### 4. TDD / 자동화 테스트 증거 (N건)
+
+#### Issue #N: {제목}
+- (동일 형식)
+
 ## 총평
 - **전체 이슈**: N건 (Critical: N, High: N, Medium: N, Low: N)
 - **아키텍처**: PASS / CONDITIONAL PASS / FAIL
 - **컨벤션**: PASS / CONDITIONAL PASS / FAIL
 - **API 설계**: PASS / CONDITIONAL PASS / FAIL
+- **TDD 증거**: PASS / CONDITIONAL PASS / FAIL
 - **종합 판정**: PASS / CONDITIONAL PASS / FAIL
 ```
 
 ---
 
-## 9. 판정 기준
+## 10. 판정 기준
 
 각 영역 및 종합 판정은 아래 기준을 따른다.
 
@@ -358,7 +408,7 @@ gstack /review: "코드가 안전한가?"
 
 ---
 
-## 10. 추가 지침
+## 11. 추가 지침
 
 - 이슈를 발견하지 못한 영역도 "N건 - 이슈 없음"으로 명시한다.
 - 수정 방향에는 가능한 한 구체적인 코드 예시를 포함한다.

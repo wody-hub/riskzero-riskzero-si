@@ -1,11 +1,7 @@
 ---
 name: riskzero-si-pipeline
 version: 1.0.0
-description: |
-  SI 개발 파이프라인 오케스트레이터. 8단계 순차 실행.
-  기획서+퍼블리싱+DDL → 구현계획 → 리뷰 → 구현 → 코드리뷰 → PR리뷰 → QA → 버그수정 → 최종검증.
-  /riskzero-si-pipeline {기능명} [--from=N] [--to=N] [--init]
-  Use when asked to "SI 파이프라인", "기능 개발", "riskzero pipeline".
+description: Use when developing an SI feature end-to-end with riskzero-si, initializing project config, or running selected pipeline stages; triggers include "SI 파이프라인", "기능 개발", "riskzero pipeline".
 allowed-tools:
   - Bash
   - Read
@@ -29,10 +25,73 @@ allowed-tools:
 **핵심 원칙:**
 - 각 단계의 산출물은 다음 단계의 입력이 된다
 - 리뷰 단계에서 문제가 발견되면 이전 단계로 되돌아간다
-- 모든 산출물은 `plan/{기능명}/` 디렉토리에 저장한다
+- 모든 영구 산출물은 `config.outputs.root/config.outputs.featureDirPattern` 규칙으로 계산한 기능별 산출물 디렉토리에 저장한다
+- `/tmp`는 임시 파일에만 사용하며, 최종 체크리스트/리포트/증거는 기능별 산출물 디렉토리로 복사하거나 직접 저장한다
 - 사용자 확인 없이 다음 단계로 넘어가지 않는다
+- 멀티 에이전트나 Dynamic Workflow를 쓰더라도 단계 게이트와 산출물 계약은 유지한다
 
 ---
+
+## 산출물 저장 계약
+
+기본 산출물 루트는 `plan/{기능명}/`이다. `si-config.yml`의 `outputs.root`와
+`outputs.featureDirPattern`이 설정되어 있으면 해당 값을 우선한다.
+
+| 구분 | 기본 경로 | 설명 |
+|------|-----------|------|
+| 설계 전 논의 | `plan/{기능명}/discussion.md` | 사용자가 결정한 gray area와 미결정/위임 항목 |
+| 계획 전 리서치 | `plan/{기능명}/research.md` | 계획 전 기술 접근, 대안, 위험 조사 결과(선택) |
+| 구현 계획 | `plan/{기능명}/implementation-plan.md` | 최종 구현 설계 |
+| TDD 계획 | `plan/{기능명}/tdd-plan.md` | RED 테스트 케이스와 실행 명령 |
+| TDD 증거 | `plan/{기능명}/tdd-report.md` | RED/GREEN/REFACTOR 실행 기록 |
+| 계획 리뷰 | `plan/{기능명}/plan-review.md` | 아키텍처/보안 계획 리뷰 |
+| 코드 리뷰 | `plan/{기능명}/code-review.md` | 프로젝트 표준 + 리서치/TDD 증거 리뷰 |
+| PR 리뷰 | `plan/{기능명}/pr-review.md` | diff 기반 안전성 리뷰 |
+| QA 체크리스트 | `plan/{기능명}/qa-checklist.md` | 기능 QA 항목 |
+| QA 리포트 | `plan/{기능명}/qa-report.md` | QA 실행 결과 |
+| 최종 리포트 | `plan/{기능명}/final-report.md` | 최종 검증 요약 |
+| 실행 증거 | `plan/{기능명}/evidence/` | 스크린샷, 로그, 테스트 결과 |
+
+기능별 산출물 디렉토리에는 아래 하위 디렉토리를 만든다:
+
+```
+evidence/
+  screenshots/
+  logs/
+  test-results/
+```
+
+이 계약은 모든 서브 스킬의 기본 경로이다. 과거 호환을 위해 `/tmp/qa-*` 파일을
+읽을 수는 있지만, 새로 생성하는 영구 산출물은 위 경로에 저장한다.
+
+## 모델/오케스트레이션 정책
+
+`si-config.yml`의 `orchestration.*` 설정이 있으면 단계별 실행 전략을 선택할 때 참고한다.
+이 설정은 권장 라우팅이며, 런타임이 지원하지 않으면 현재 에이전트가 inline으로 실행한다.
+subagent와 Dynamic Workflow는 단계 내부 보조자일 뿐이며, 다음 단계로 진행하거나 PASS/FAIL 게이트를 대신 확정할 수 없다.
+
+| 단계 | 기본 추천 | 멀티 에이전트/Dynamic Workflow 사용 조건 |
+|------|-----------|------------------------------------------|
+| 1 계획/외부 리서치 | Claude Opus급 또는 Codex high reasoning | 외부 공식 문서 확인, 대규모 소스 분석처럼 read-only 병렬 작업이 있을 때 |
+| 2 계획 리뷰 | Claude Opus급 또는 Codex review | 보안/아키텍처/TDD 반례를 독립 리뷰로 확인할 때 |
+| 3 구현 | Codex | BE/FE/DB write set이 분리되어 충돌 위험이 낮을 때만 subagent 병렬화 |
+| 4 코드 리뷰 | Codex review + Claude 교차 검토 | 구현 산출물은 고정하고 read-only 리뷰로만 병렬화 |
+| 5 PR 리뷰 | Codex review | diff 기반 안전성 리뷰. 보조 리뷰는 read-only로 제한 |
+| 6 QA 체크리스트 | Claude/Codex + gstack browse | 시나리오 작성과 브라우저 실행을 분리할 수 있을 때 |
+| 7 QA 수정 | Codex | 재현/수정/검증 루프는 inline 우선. 독립 버그만 분리 |
+| 8 최종 검증 | Codex + gstack browser | 스크린샷/로그 수집은 병렬 가능하나 최종 판정은 단일 리포트로 통합 |
+
+Claude Code Dynamic Workflows는 research preview 성격의 기능이므로
+`orchestration.dynamicWorkflowDefault`가 `allowed`가 아닌 한 사용자에게 먼저 묻는다.
+작은 CRUD 화면, 사용자 의사결정이 잦은 설계 논의, 같은 파일을 여러 작업자가 수정하는 구현에는 사용하지 않는다.
+
+### 병렬화 안전 제약
+
+- subagent 기본 권한은 read-only로 본다.
+- 병렬 쓰기는 `orchestration.allowParallelWrites: true`이고 BE/FE/DB처럼 write set이 명확히 분리될 때만 고려한다.
+- 라우트 파일, API contract, `tdd-report.md`, `qa-report.md`, `final-report.md`처럼 공유 산출물은 inline 단일 오너가 작성한다.
+- Step 6~8에서 브라우저/DB/인증 세션을 병렬로 조작하려면 테스트 데이터 prefix, 계정 격리, cleanup 정책이 있어야 한다.
+- Dynamic Workflow 결과도 반드시 기능별 산출물 디렉토리로 합성하고, 최종 판정은 현재 파이프라인 오너가 기록한다.
 
 ## 사전 조건
 
@@ -123,14 +182,14 @@ Claude Code를 쓰는 경우:
 
 | 단계 | 스킬 명령 | 설명 | 산출물 |
 |------|-----------|------|--------|
-| 1 | `/riskzero-si-plan {기능명}` | 구현 계획 수립 | `plan/{기능명}/implementation-plan.md` |
-| 2 | `/riskzero-si-plan-review` | 계획 리뷰 (아키텍처/보안) | `plan/{기능명}/plan-review.md` |
-| 3 | `/riskzero-si-impl {기능명}` | FE/BE 코드 구현 | 실제 소스 파일들 |
-| 4 | `/riskzero-si-review` | 프로젝트 표준 준수 리뷰 | `plan/{기능명}/code-review.md` |
+| 1 | `/riskzero-si-plan {기능명}` | 설계 전 논의 + 선택적 리서치 + 구현/TDD 계획 | `discussion.md`, `research.md`(선택), `implementation-plan.md`, `tdd-plan.md` |
+| 2 | `/riskzero-si-plan-review` | 논의/리서치/TDD 포함 계획 리뷰 | `plan/{기능명}/plan-review.md` |
+| 3 | `/riskzero-si-impl {기능명}` | TDD 기반 FE/BE 코드 구현 | 실제 소스 파일들, `tdd-report.md` |
+| 4 | `/riskzero-si-review` | 프로젝트 표준 + 리서치/TDD 증거 리뷰 | `plan/{기능명}/code-review.md` |
 | 5 | `/riskzero-si-pr-review` | PR diff 안전성 리뷰 | `plan/{기능명}/pr-review.md` |
-| 6 | `/riskzero-si-qa-checklist {기능명}` | QA 체크리스트 생성 | `plan/{기능명}/qa-checklist.md` |
+| 6 | `/riskzero-si-qa-checklist {기능명}` | QA 체크리스트 생성 | `plan/{기능명}/qa-checklist.md`, `qa-report.md`(테스트 실행 시) |
 | 7 | `/riskzero-si-qa` | 버그 조사 및 수정 | 수정된 소스 파일들 |
-| 8 | `/riskzero-si-browse` | 브라우저 최종 검증 | `plan/{기능명}/final-report.md` |
+| 8 | `/riskzero-si-browse` | 브라우저 최종 검증 | `plan/{기능명}/final-report.md`, `evidence/screenshots/` |
 
 ---
 
@@ -142,7 +201,7 @@ Claude Code를 쓰는 경우:
 # 3단계(구현)부터 실행
 /riskzero-si-pipeline {기능명} --from=3
 
-# 1~4단계만 실행 (계획 수립 → 리뷰 → 구현 → 코드 리뷰)
+# 1~4단계만 실행 (논의/리서치/계획 → 리뷰 → 구현 → 코드 리뷰)
 /riskzero-si-pipeline {기능명} --from=1 --to=4
 
 # 6단계(QA)부터 끝까지
@@ -161,10 +220,15 @@ Claude Code를 쓰는 경우:
 
 ## 단계별 실행 절차
 
-### 1단계: 구현 계획 수립 (`/riskzero-si-plan`)
+### 1단계: 설계 전 논의 + 선택적 리서치 + 구현/TDD 계획 (`/riskzero-si-plan`)
 
 **수행 내용:**
 - si-config.yml에서 wireframe, publishing, ddl 경로를 읽는다
+- 기획서/퍼블리싱/DDL/README를 얕게 분석하여 설계 전 논의가 필요한 gray area를 식별한다
+- 사용자가 선택한 gray area를 논의하고 결정사항을 `discussion.md`에 저장한다
+- 리서치 필요성을 판단하고 사용자에게 진행/스킵을 질문한다
+- 리서치를 진행하면 기술 접근, 대안, 위험, 테스트 관점을 `research.md`에 저장한다
+- 리서치를 스킵하거나 기존 `research.md`를 무시하면 `implementation-plan.md`에 상태와 사유를 기록한다
 - 기획서(와이어프레임)를 분석하여 화면 구성, 필드, 동작을 파악한다
 - 퍼블리싱 HTML/CSS를 분석하여 UI 컴포넌트 구조를 파악한다
 - DDL을 분석하여 테이블 구조, 컬럼, 관계를 파악한다
@@ -172,23 +236,26 @@ Claude Code를 쓰는 경우:
 - API 설계 (엔드포인트, 요청/응답 스펙)를 작성한다
 - 프론트엔드 페이지 구조 및 컴포넌트 설계를 작성한다
 - 백엔드 클래스 설계 (Controller, Service, Mapper, DTO, VO)를 작성한다
+- 구현 전에 실패해야 하는 테스트 케이스와 실행 명령을 `tdd-plan.md`에 작성한다
 
-**산출물:** `plan/{기능명}/implementation-plan.md`
+**산출물:** `plan/{기능명}/discussion.md`, `plan/{기능명}/research.md`(선택), `plan/{기능명}/implementation-plan.md`, `plan/{기능명}/tdd-plan.md`
 
 **진행 조건:** 사용자가 계획을 확인하고 승인한다.
 **중단 조건:** 기획서, DDL 등 필수 입력 자료가 누락된 경우 사용자에게 경로를 확인 요청한다.
 
 ---
 
-### 2단계: 계획 리뷰 (`/riskzero-si-plan-review`)
+### 2단계: 논의/리서치/TDD 포함 계획 리뷰 (`/riskzero-si-plan-review`)
 
 **수행 내용:**
-- 1단계에서 생성된 `implementation-plan.md`를 아키텍처/보안 관점에서 리뷰한다
+- 1단계에서 생성된 `discussion.md`, `research.md`(있으면), `implementation-plan.md`, `tdd-plan.md`를 함께 리뷰한다
+- `discussion.md`의 결정사항 또는 `research.md`의 권장사항/스킵 사유가 구현 계획에 반영되었는지 확인한다
 - 프로젝트 README.md의 규칙이 계획에 반영되었는지 확인한다
 - API 네이밍 규칙 준수 여부를 확인한다
 - DTO/VO 분리 규칙 준수 여부를 확인한다
 - 보안(권한 체크) 설계 포함 여부를 확인한다
 - 유효성 검증 레이어 설계 포함 여부를 확인한다
+- 구현 전에 실패해야 하는 RED 테스트가 `tdd-plan.md`에 구체적으로 정의되었는지 확인한다
 
 **산출물:** `plan/{기능명}/plan-review.md`
 
@@ -201,25 +268,29 @@ Claude Code를 쓰는 경우:
 
 **수행 내용:**
 - 승인된 `implementation-plan.md`를 기반으로 실제 코드를 생성한다
+- `tdd-plan.md`의 테스트를 먼저 작성하고 RED(예상 실패)를 확인한다
+- RED가 확인된 뒤 최소 구현으로 GREEN을 만들고, 필요 시 REFACTOR를 수행한다
 - si-config.yml의 structure 패턴에 따라 파일을 생성한다
 - 백엔드: Controller, Service, Mapper(interface), Mapper(XML), DTO, VO 파일 생성
 - 프론트엔드: 목록 페이지, 상세 페이지, API 훅 파일 생성
 - 라우터에 새 페이지 경로를 등록한다
 - 샘플 코드의 패턴(임포트, 코드 스타일, 구조)을 정확히 따른다
 - 템플릿 마커 주석(`// ---`)을 최종 코드에서 제거한다
+- RED/GREEN/REFACTOR 실행 명령, 결과, 테스트 파일 목록을 `tdd-report.md`에 저장한다
 
-**산출물:** 실제 소스 파일들 (프로젝트 디렉토리에 직접 생성)
+**산출물:** 실제 소스 파일들 (프로젝트 디렉토리에 직접 생성), `plan/{기능명}/tdd-report.md`
 
 **진행 조건:** 빌드(buildCmd) 성공, 린트(lintCmd) 통과.
 **중단 조건:** 빌드 또는 린트 실패 시 오류를 수정한 후 재실행. 3회 이상 실패 시 사용자에게 보고한다.
 
 ---
 
-### 4단계: 프로젝트 표준 리뷰 (`/riskzero-si-review`)
+### 4단계: 프로젝트 표준 + 리서치/TDD 증거 리뷰 (`/riskzero-si-review`)
 
 **수행 내용:**
 - 3단계에서 생성/수정된 모든 파일을 대상으로 프로젝트 표준 준수 여부를 검사한다
 - README.md 및 si-config.yml에 정의된 규칙 기반으로 리뷰한다
+- `implementation-plan.md`가 리서치 수행/사용 상태이면 `research.md` 권장 접근, 위험 경고, 테스트 관점이 코드와 `tdd-report.md`에 반영되었는지 확인한다
 - 검사 항목:
   - 네이밍 컨벤션 (변수, 메서드, 클래스, 파일명)
   - 패키지/디렉토리 구조
@@ -230,6 +301,8 @@ Claude Code를 쓰는 경우:
   - 권한 체크 어노테이션
   - API 응답 형식
   - 유효성 검증 누락
+  - `tdd-plan.md`와 `tdd-report.md`가 존재하고 RED/GREEN 증거가 일치하는지 확인
+  - 테스트 없이 구현된 주요 동작이 없는지 확인
 
 **산출물:** `plan/{기능명}/code-review.md`
 
@@ -249,6 +322,7 @@ Claude Code를 쓰는 경우:
   - 성능 이슈 (N+1 쿼리, 불필요한 재렌더링 등)
   - 에러 핸들링 누락
   - 테스트 필요 여부
+  - TDD 증거 없이 추가된 위험 동작 또는 테스트 누락
 
 **산출물:** `plan/{기능명}/pr-review.md`
 
@@ -330,16 +404,16 @@ Claude Code를 쓰는 경우:
 [시작]
   │
   ▼
-1. 구현 계획 수립 ──→ plan/{기능명}/implementation-plan.md
+1. 논의 + 선택적 리서치 + 구현/TDD 계획 ──→ discussion.md + research.md(선택) + implementation-plan.md + tdd-plan.md
   │
   ▼
 2. 계획 리뷰 ──────→ plan/{기능명}/plan-review.md
   │                    ↑ CRITICAL 시 1단계로 복귀
   ▼
-3. 코드 구현 ──────→ 실제 소스 파일
+3. TDD 코드 구현 ───→ 실제 소스 파일 + tdd-report.md
   │                    ↑ 빌드 실패 시 재시도
   ▼
-4. 표준 리뷰 ──────→ plan/{기능명}/code-review.md
+4. 표준+TDD 리뷰 ───→ plan/{기능명}/code-review.md
   │                    ↑ ERROR 시 3단계 코드 수정
   ▼
 5. PR 리뷰 ────────→ plan/{기능명}/pr-review.md
@@ -361,17 +435,27 @@ Claude Code를 쓰는 경우:
 
 ## 출력 디렉토리 구조
 
-모든 산출물은 프로젝트 루트의 `plan/{기능명}/` 디렉토리에 저장된다.
+모든 산출물은 기본적으로 프로젝트 루트의 `plan/{기능명}/` 디렉토리에 저장된다.
+`si-config.yml`의 `outputs` 설정이 있으면 해당 경로를 우선한다.
 
 ```
 plan/
   └── {기능명}/
+      ├── discussion.md            # 1단계: 설계 전 논의 결정사항
+      ├── research.md              # 1단계: 계획 전 기술 리서치(선택)
       ├── implementation-plan.md   # 1단계: 구현 계획서
+      ├── tdd-plan.md              # 1단계: TDD 테스트 설계
       ├── plan-review.md           # 2단계: 계획 리뷰 결과
+      ├── tdd-report.md            # 3단계: RED/GREEN/REFACTOR 증거
       ├── code-review.md           # 4단계: 코드 리뷰 결과
       ├── pr-review.md             # 5단계: PR 리뷰 결과
       ├── qa-checklist.md          # 6단계: QA 체크리스트
-      └── final-report.md          # 8단계: 최종 검증 보고서
+      ├── qa-report.md             # 6~7단계: QA 실행 리포트
+      ├── final-report.md          # 8단계: 최종 검증 보고서
+      └── evidence/
+          ├── screenshots/
+          ├── logs/
+          └── test-results/
 ```
 
 ---
@@ -383,7 +467,7 @@ plan/
 1. **인자 파싱**: 기능명, --from, --to, --init 옵션을 파싱한다
 2. **--init 처리**: --init 플래그가 있으면 초기화 모드로 진입한다
 3. **설정 파일 로드**: si-config.yml을 탐색하고 로드한다
-4. **산출물 디렉토리 생성**: `plan/{기능명}/` 디렉토리를 생성한다
+4. **산출물 디렉토리 생성**: `outputs` 설정을 해석하여 기능별 산출물 디렉토리와 `evidence/` 하위 디렉토리를 생성한다
 5. **TaskCreate로 단계 등록**: 실행할 단계들을 Task로 등록하여 진행 상황을 추적한다
 6. **순차 실행**: 각 단계를 Skill 호출로 실행한다
 7. **게이트 체크**: 각 단계 완료 후 진행/중단/복귀를 판단한다

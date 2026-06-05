@@ -1,12 +1,7 @@
 ---
 name: riskzero-si-plan-review
 version: 1.0.0
-description: |
-  구현 계획서 아키텍처/보안 리뷰. gstack plan-eng-review를 래핑한다.
-  구현 계획서의 아키텍처, 데이터 흐름, 엣지 케이스, 보안 설계를 점검하고
-  프로젝트 README.md 표준 준수 여부도 함께 확인한다.
-  /riskzero-si-plan-review
-  Use when asked to "계획 리뷰", "plan review", "아키텍처 리뷰", "설계 리뷰".
+description: Use when reviewing a riskzero-si implementation plan before coding; triggers include "계획 리뷰", "plan review", "아키텍처 리뷰", "설계 리뷰".
 allowed-tools:
   - Bash
   - Read
@@ -42,6 +37,9 @@ gstack의 `/plan-eng-review` 스킬을 활용하여 아키텍처, 데이터 흐�
 
 `plan/` 디렉토리에서 가장 최근 구현 계획서를 찾는다.
 - `plan/{기능명}/implementation-plan.md`
+- `plan/{기능명}/discussion.md`
+- `plan/{기능명}/research.md` (`implementation-plan.md`가 performed/use-existing 상태일 때 읽음. skipped/ignored-existing이면 스킵/무시 사유 확인)
+- `plan/{기능명}/tdd-plan.md`
 
 계획서가 없으면:
 > 구현 계획서가 없습니다. `/riskzero-si-plan {기능명}`으로 먼저 계획을 수립하세요.
@@ -56,6 +54,9 @@ gstack 리뷰 실행 **전에**, 프로젝트 README.md(`config.project.readme`)
 - **보안**: 권한 체크 어노테이션이 포함되었는가
 - **검증**: 3-layer 검증 (DTO → Validator → Service) 설계가 포함되었는가
 - **트랜잭션**: Service 레이어에만 @Transactional이 설계되었는가
+- **설계 전 논의**: `discussion.md`의 결정사항이 구현 계획에 반영되었는가
+- **계획 전 리서치**: `implementation-plan.md`의 리서치 상태가 명확하고, `research.md` 권장사항 또는 스킵/무시 사유가 구현 계획에 반영되었는가
+- **TDD 계획**: `tdd-plan.md`의 RED 테스트 케이스가 주요 BE/FE 동작과 연결되는가
 
 불일치 항목이 있으면 목록으로 정리한다.
 
@@ -64,6 +65,16 @@ gstack 리뷰 실행 **전에**, 프로젝트 README.md(`config.project.readme`)
 Skill 도구를 사용하여 `/plan-eng-review`를 호출한다.
 
 gstack이 아키텍처, 데이터 흐름, 엣지 케이스, 테스트 커버리지, 성능 관점에서 계획서를 리뷰한다.
+
+추가로 아래 항목을 반드시 확인한다:
+- `discussion.md`가 존재하고 gray area 결정사항이 `implementation-plan.md`에 반영되었는가?
+- 리서치를 수행했다면 `research.md`가 존재하고 권장 접근/위험/테스트 관점이 계획에 반영되었는가?
+- 외부 리서치를 수행했다면 URL, 확인일, 출처 유형, 적용 판단이 `research.md`에 기록되었는가?
+- 리서치를 스킵했다면 `implementation-plan.md`에 스킵 사유가 명확히 기록되었는가?
+- 기존 `research.md`를 무시했다면 `implementation-plan.md`에 `Status: ignored-existing`과 무시 사유가 기록되었는가?
+- `tdd-plan.md`가 존재하고 구현 전에 실패해야 할 테스트 케이스가 구체적인가?
+- `backend.testCmd` / `frontend.testCmd`가 없을 때 대체 테스트 명령 탐색 전략이 있는가?
+- 테스트가 구현 후 회귀 검증이 아니라 구현 전 RED 확인에 사용할 수 있게 설계되었는가?
 
 ### 5. 통합 리뷰 결과 정리
 
@@ -81,6 +92,24 @@ README.md 표준 체크 결과와 gstack 리뷰 결과를 통합하여 `plan/{�
 
 ## gstack 리뷰 결과
 (gstack /plan-eng-review 결과 요약)
+
+## 설계 전 논의 반영
+- discussion.md 존재: Y/N
+- 구현 계획 반영: PASS/FAIL
+
+## 계획 전 리서치 반영
+- research status: performed / use-existing / skipped / ignored-existing
+- external research status: performed / skipped / unavailable / not-needed
+- research.md 존재: Y/N
+- external citations: PASS/FAIL/N/A
+- 리서치 수행/스킵 판단 근거: PASS/FAIL
+- 권장 접근/위험/테스트 관점 반영: PASS/FAIL
+
+## TDD 계획 검토
+- tdd-plan.md 존재: Y/N
+- RED 테스트 구체성: PASS/FAIL
+- 테스트 명령 정의: PASS/FAIL
+- 주요 동작 커버: PASS/FAIL
 
 ## 종합 판정
 - PASS: 진행 가능
