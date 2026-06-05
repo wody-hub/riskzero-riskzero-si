@@ -1,7 +1,7 @@
 ---
 name: riskzero-si-pr-review
 version: 1.0.0
-description: Use when reviewing git diff or PR changes for safety after riskzero-si implementation; triggers include "PR 리뷰", "pr review", "diff 리뷰", "코드 안전성 리뷰".
+description: Use when reviewing git diff or PR changes for safety after riskzero-si implementation; triggers include "PR 리뷰", "pr review", "diff 리뷰", "코드 안전성 리뷰". riskzero-si 구현과 무관한 일반 PR 리뷰에는 사용하지 않는다 (gstack /review 사용).
 allowed-tools:
   - Bash
   - Read

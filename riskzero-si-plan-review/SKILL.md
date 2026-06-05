@@ -1,7 +1,7 @@
 ---
 name: riskzero-si-plan-review
 version: 1.0.0
-description: Use when reviewing a riskzero-si implementation plan before coding; triggers include "계획 리뷰", "plan review", "아키텍처 리뷰", "설계 리뷰".
+description: Use when reviewing a riskzero-si implementation plan before coding; triggers include "계획 리뷰", "plan review", "아키텍처 리뷰", "설계 리뷰". riskzero-si 계획서가 없는 일반 설계/아키텍처 리뷰에는 사용하지 않는다.
 allowed-tools:
   - Bash
   - Read

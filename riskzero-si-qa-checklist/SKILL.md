@@ -1,7 +1,7 @@
 ---
 name: riskzero-si-qa-checklist
 version: 1.0.0
-description: Use when generating QA checklists or browser test plans for implemented SI screens; triggers include "화면검증", "qa checklist", "QA 체크리스트".
+description: Use when generating QA checklists or browser test plans for implemented SI screens; triggers include "화면검증", "qa checklist", "QA 체크리스트". 일반 테스트 작성 요청에는 사용하지 않는다.
 allowed-tools:
   - Bash
   - Read

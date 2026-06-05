@@ -1,7 +1,7 @@
 ---
 name: riskzero-si-qa
 version: 1.0.0
-description: Use when investigating or fixing QA failures, browser test failures, or bugs found in riskzero-si reports; triggers include "버그 수정", "qa", "QA", "버그 조사", "테스트 수정".
+description: Use when investigating or fixing QA failures, browser test failures, or bugs found in riskzero-si reports; triggers include "버그 수정", "qa", "QA", "버그 조사", "테스트 수정". riskzero-si QA 체크리스트가 없는 일반 버그 수정/QA에는 사용하지 않는다.
 allowed-tools:
   - Bash
   - Read

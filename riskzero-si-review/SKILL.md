@@ -1,7 +1,7 @@
 ---
 name: riskzero-si-review
 version: 1.0.0
-description: Use when reviewing generated code against project README standards, architecture, conventions, API design, or TDD evidence; triggers include "코드 리뷰", "표준 점검", "컨벤션 체크".
+description: Use when reviewing generated code against project README standards, architecture, conventions, API design, or TDD evidence; triggers include "코드 리뷰", "표준 점검", "컨벤션 체크". 일반 코드 리뷰(버그/안전성)에는 사용하지 않는다 (gstack /review 또는 /code-review 사용).
 allowed-tools:
   - Bash
   - Read

@@ -1,7 +1,7 @@
 ---
 name: riskzero-si-impl
 version: 1.0.0
-description: Use when implementing an approved riskzero-si plan or generating FE/BE code from plan artifacts; triggers include "구현", "코드 작성", "implement", "코드노예".
+description: Use when implementing an approved riskzero-si plan or generating FE/BE code from plan artifacts; triggers include "구현", "코드 작성", "implement", "코드노예". riskzero-si 구현 계획서가 없는 일반 구현/코드 작성 요청에는 사용하지 않는다.
 allowed-tools:
   - Bash
   - Read

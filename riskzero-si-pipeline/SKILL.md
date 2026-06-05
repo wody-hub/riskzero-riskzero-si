@@ -1,7 +1,7 @@
 ---
 name: riskzero-si-pipeline
 version: 1.0.0
-description: Use when developing an SI feature end-to-end with riskzero-si, initializing project config, or running selected pipeline stages; triggers include "SI 파이프라인", "기능 개발", "riskzero pipeline".
+description: Use when developing an SI feature end-to-end with riskzero-si, initializing project config, or running selected pipeline stages; triggers include "SI 파이프라인", "기능 개발", "riskzero pipeline". 일반적인 기능 개발 요청에는 사용하지 않는다.
 allowed-tools:
   - Bash
   - Read

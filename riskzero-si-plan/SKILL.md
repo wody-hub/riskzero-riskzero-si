@@ -1,7 +1,7 @@
 ---
 name: riskzero-si-plan
 version: 1.0.0
-description: Use when planning an SI feature from wireframes, publishing files, DDL, or README standards; triggers include "구현 계획", "implementation plan", "설계", "두뇌풀가동".
+description: Use when planning an SI feature from wireframes, publishing files, DDL, or README standards; triggers include "구현 계획", "implementation plan", "설계", "두뇌풀가동". 기획서/퍼블리싱/DDL 입력 소스가 없는 일반 설계·리팩토링 계획에는 사용하지 않는다.
 allowed-tools:
   - Bash
   - Read

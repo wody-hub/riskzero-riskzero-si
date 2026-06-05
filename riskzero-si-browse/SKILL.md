@@ -1,7 +1,7 @@
 ---
 name: riskzero-si-browse
 version: 1.0.0
-description: Use when running final browser verification for a riskzero-si feature, QA checklist, screenshots, or final report; triggers include "브라우저 테스트", "최종 검증", "browse", "화면 테스트".
+description: Use when running final browser verification for a riskzero-si feature, QA checklist, screenshots, or final report; triggers include "브라우저 테스트", "최종 검증", "browse", "화면 테스트". 일반 브라우저 테스트/QA에는 사용하지 않는다 (gstack /browse, /qa-only 사용).
 allowed-tools:
   - Bash
   - Read
