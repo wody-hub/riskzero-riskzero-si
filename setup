@@ -44,8 +44,8 @@ done
 
 if [ -z "$HOST" ]; then
   case "$INSTALL_DIR" in
-    "$HOME/.codex/skills/riskzero-si"*) HOST="codex" ;;
-    "$HOME/.claude/skills/riskzero-si"*) HOST="claude" ;;
+    "$HOME/.codex/skills/riskzero-si"*|"$HOME/.codex/skills/riskzero-riskzero-si"*) HOST="codex" ;;
+    "$HOME/.claude/skills/riskzero-si"*|"$HOME/.claude/skills/riskzero-riskzero-si"*) HOST="claude" ;;
     *)
       echo "Error: install host를 알 수 없습니다." >&2
       echo "" >&2

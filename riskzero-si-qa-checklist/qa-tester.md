@@ -31,7 +31,11 @@
 ## 브라우저 도구 설정
 
 ```bash
-if [ -x ~/.codex/skills/gstack/browse/dist/browse ]; then
+if [ -x ~/.codex/skills/gstack/browse/bin/find-browse ]; then
+  B="$(~/.codex/skills/gstack/browse/bin/find-browse)"
+elif [ -x ~/.claude/skills/gstack/browse/bin/find-browse ]; then
+  B="$(~/.claude/skills/gstack/browse/bin/find-browse)"
+elif [ -x ~/.codex/skills/gstack/browse/dist/browse ]; then
   B=~/.codex/skills/gstack/browse/dist/browse
 else
   B=~/.claude/skills/gstack/browse/dist/browse
