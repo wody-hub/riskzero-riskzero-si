@@ -46,6 +46,16 @@ git clone https://github.com/wody-hub/riskzero-riskzero-si.git ~/riskzero-si
 cd ~/riskzero-si && ./setup --host claude
 ```
 
+### 설치 확인
+
+Codex 또는 Claude Code를 **새 세션으로 다시 시작**한 뒤 아래 명령이 인식되는지 확인한다:
+
+```
+/riskzero-si-pipeline
+```
+
+> 스킬 목록에 `riskzero-si-pipeline`, `riskzero-si-plan` 등이 보이면 설치 완료.
+
 ### 업데이트
 
 ```bash
@@ -54,6 +64,8 @@ cd ~/riskzero-si && git pull
 ```
 
 Claude Code를 쓰면 마지막 명령만 `./setup --host claude`로 바꾸면 된다.
+
+문서만 바뀐 경우에도 새 스킬 추가나 링크 변경이 있을 수 있으므로 `./setup --host ...`를 다시 실행하는 편이 안전하다.
 
 ## 사용법
 

@@ -66,66 +66,8 @@ Step 8: /riskzero-si-browse         ─ 최종 브라우저 검증
 
 ## 2. 설치
 
-이 repo는 `~/riskzero-si`처럼 **임의 경로에 clone**해도 됩니다. 다만 설치 대상이 Codex인지 Claude Code인지에 맞춰 `./setup --host ...`를 명시해서 실행해야 합니다.
-
-### Step 1: Bun 설치
-
-```bash
-curl -fsSL https://bun.sh/install | bash
-```
-
-### Step 2: gstack 설치
-
-#### Codex용
-
-```bash
-git clone https://github.com/garrytan/gstack.git ~/gstack
-cd ~/gstack && ./setup --host codex
-```
-
-#### Claude Code용
-
-```bash
-git clone https://github.com/garrytan/gstack.git ~/gstack
-cd ~/gstack && ./setup --host claude
-```
-
-### Step 3: riskzero-si 설치
-
-#### Codex용
-
-```bash
-git clone https://github.com/wody-hub/riskzero-riskzero-si.git ~/riskzero-si
-cd ~/riskzero-si && ./setup --host codex
-```
-
-#### Claude Code용
-
-```bash
-git clone https://github.com/wody-hub/riskzero-riskzero-si.git ~/riskzero-si
-cd ~/riskzero-si && ./setup --host claude
-```
-
-### 설치 확인
-
-Codex 또는 Claude Code를 **새 세션으로 다시 시작**한 뒤 아래 명령이 인식되는지 확인합니다:
-
-```
-/riskzero-si-pipeline
-```
-
-> 스킬 목록에 `riskzero-si-pipeline`, `riskzero-si-plan` 등이 보이면 설치 완료.
-
-### 업데이트
-
-```bash
-cd ~/riskzero-si && git pull
-./setup --host codex
-```
-
-Claude Code를 쓰면 마지막 명령만 `./setup --host claude`로 바꾸면 됩니다.
-
-문서만 바뀐 경우에도 새 스킬 추가나 링크 변경이 있을 수 있으므로 `./setup --host ...`를 다시 실행하는 편이 안전합니다.
+설치/업데이트 절차는 **[README.md의 설치 섹션](README.md#설치)** 을 따릅니다.
+(Bun → gstack → riskzero-si 순서, host별 `./setup --host codex|claude`, 설치 확인, 업데이트 방법 포함)
 
 ---
 
