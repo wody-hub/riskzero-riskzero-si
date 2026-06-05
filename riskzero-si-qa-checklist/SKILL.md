@@ -459,6 +459,19 @@ print(json.dumps(result, ensure_ascii=False, indent=2))
 
 백엔드 API를 통해 `{config.dummyData.count}`건의 테스트 데이터를 생성한다.
 
+#### 6-1-0. 대상 서버 확인 (필수 게이트)
+
+더미데이터는 실제 서버에 데이터를 **쓰는** 작업이다. 생성 시작 전 반드시 대상 서버를 확인한다:
+
+1. `config.server.backend.baseUrl`을 확인한다.
+2. `config.dummyData.allowedHosts`가 설정되어 있으면, baseUrl의 호스트가 목록에 포함될 때만 진행한다. 미포함이면 중단하고 사용자에게 보고한다.
+3. `allowedHosts`가 없으면 AskUserQuestion으로 명시적 확인을 받는다:
+   - 질문: "다음 서버에 테스트 데이터 {count}건을 등록합니다: `{baseUrl}`. 이 서버가 개발/테스트 환경이 맞습니까?"
+   - 사용자가 거부하면 더미데이터 생성을 건너뛰고 체크리스트만 남긴다.
+4. baseUrl 호스트에 `prod`, `production`, `live`, `운영` 문자열이 포함되면 위 확인과 무관하게 **중단**하고 사용자에게 보고한다.
+
+> 생성된 데이터는 `{config.dummyData.prefix}` 식별자가 붙으므로, 정리가 필요하면 해당 prefix로 검색하여 삭제할 수 있다고 사용자에게 안내한다.
+
 #### 사전 준비
 
 ```bash
