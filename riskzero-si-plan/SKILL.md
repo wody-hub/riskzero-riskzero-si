@@ -851,127 +851,23 @@ plan/{기능명}/tdd-plan.md
 
 ## 8. 프레임워크별 분기
 
-설정 파일의 `backend.framework`와 `frontend.framework` 값에 따라
-설계 패턴을 분기한다. 아래는 주요 프레임워크별 가이드이다.
-
-### 8.1 백엔드 프레임워크 분기
-
-#### spring-boot (Java/Kotlin)
-- **계층 구조**: Controller → Service → Mapper
-- **ORM**: MyBatis XML 매퍼 (또는 JPA Entity)
-- **DTO 분리**: SearchDto, RegDto, ModDto, ResDto 각각 별도 파일
-- **VO 분리**: CUD용 VO, 조회용 SelectVO
-- **트랜잭션**: Service 계층에 `@Transactional`
-- **인증/인가**: `@PreAuthorize` 어노테이션
-- **유효성 검증**: Bean Validation + Spring Validator + Service 로직
-- **응답 형식**: `ResponseEntity<T>`, RFC 7807 에러
-- **공통 코드**: `CommonCodeService.selectCommonCodeName()` 사용, SQL JOIN 금지
-
-#### express (Node.js/TypeScript)
-- **계층 구조**: Router → Controller → Service
-- **ORM**: Sequelize / TypeORM / Prisma / Knex
-- **미들웨어**: 인증, 유효성 검증, 에러 핸들링
-- **응답 형식**: Express Response 래핑
-
-#### nestjs (TypeScript)
-- **계층 구조**: Controller → Service → Repository
-- **ORM**: TypeORM / Prisma / MikroORM
-- **데코레이터**: `@Controller`, `@Injectable`, `@Get/@Post/@Put/@Delete`
-- **Guard**: 인증/인가 Guard
-- **Pipe**: 유효성 검증 Pipe (class-validator)
-- **DTO**: class-validator + class-transformer
-
-#### django (Python)
-- **계층 구조**: View → Serializer → Model
-- **ORM**: Django ORM (QuerySet)
-- **URL 라우팅**: `urls.py` + ViewSet
-- **인증/인가**: Permission 클래스
-- **직렬화**: DRF Serializer
-
-### 8.2 프론트엔드 프레임워크 분기
-
-#### react (CRA/Vite)
-- **컴포넌트**: 함수형 컴포넌트 + Hook
-- **상태 관리**: Zustand / Redux Toolkit
-- **서버 상태**: TanStack Query (useQuery, useMutation)
-- **API 호출**: 커스텀 API 훅 (useApi 등 프로젝트 표준)
-- **라우팅**: React Router v6+
-- **폼 처리**: React Hook Form / 직접 관리
-- **UI 라이브러리**: MUI v5/v6 / Ant Design
-
-#### vue (Vue 3)
-- **컴포넌트**: SFC (Single File Component) + Composition API
-- **상태 관리**: Pinia
-- **서버 상태**: VueQuery / 직접 관리
-- **라우팅**: Vue Router
-- **폼 처리**: VeeValidate + Zod/Yup
-
-#### angular
-- **컴포넌트**: Component + Template + Module
-- **서비스**: Injectable Service (HttpClient)
-- **상태 관리**: NgRx / Akita / Signal
-- **폼 처리**: Reactive Forms + Validators
-- **라우팅**: Angular Router
-
-#### next (Next.js)
-- **라우팅**: App Router (app/) 또는 Pages Router (pages/)
-- **컴포넌트**: Server Component (기본) + Client Component ('use client')
-- **데이터**: Server Actions / Route Handlers / fetch
-- **상태 관리**: Zustand / Jotai (Client Component 전용)
+설정 파일의 `backend.framework`와 `frontend.framework` 값에 따라 설계 패턴을 분기한다.
+이 스킬 디렉토리의 **`frameworks.md`** 에서 해당 프레임워크 섹션만 읽고 적용한다.
+다른 프레임워크 섹션은 읽지 않는다.
+(지원: spring-boot / express / nestjs / django × react / vue / angular / next)
 
 ---
 
 ## 9. 범용화 원칙
 
-이 스킬은 특정 프로젝트에 종속되지 않는 **범용 설계 도구**이다.
-다음 원칙을 반드시 준수한다.
+이 스킬은 특정 프로젝트에 종속되지 않는 **범용 설계 도구**이다. 핵심 원칙:
 
-### 9.1 하드코딩 금지
+1. **하드코딩 금지** — 경로/패키지/클래스명 패턴은 `si-config.yml` → README.md 추론 → 사용자 질문 순서로 결정한다
+2. **README.md 우선** — README 코드 생성 가이드 > si-config.yml > 기존 코드 패턴 > 프레임워크 Best Practice
+3. **기존 코드 패턴 학습** — 설계 전 반드시 유사 기능 코드를 탐색하되, README 표준과 충돌하면 README를 따른다
 
-- 모든 경로, 패키지명, 클래스명 패턴은 `si-config.yml`에서 읽는다
-- config에 없으면 `README.md`에서 추론한다
-- 추론도 불가능하면 사용자에게 질문한다
-- 절대로 특정 프로젝트의 경로나 패키지를 코드에 직접 쓰지 않는다
-
-### 9.2 README.md 우선
-
-```
-우선순위:
-1. README.md에 명시된 코드 생성 가이드 / 코딩 컨벤션
-2. si-config.yml에 정의된 설정
-3. 기존 코드에서 학습한 패턴
-4. 프레임워크의 일반적인 Best Practice
-```
-
-README.md에 **코드 생성 가이드** 섹션이 있다면 해당 내용을 최우선으로 따른다.
-기존 코드의 패턴과 README.md 규칙이 충돌하면 README.md를 따른다.
-
-### 9.3 기존 코드 패턴 학습
-
-- 새 코드를 설계하기 전에 반드시 기존 코드를 탐색한다
-- 유사한 CRUD 기능이 있다면 그 패턴을 참고한다
-- 단, README.md 표준과 충돌하면 README.md를 따른다
-
-### 9.4 설정 누락 시 동작
-
-필수 설정이 누락된 경우의 동작:
-
-| 누락 항목 | 동작 |
-|-----------|------|
-| `sources.wireframe` | 사용자에게 기획서 경로 질문 |
-| `sources.publishing` | 퍼블리싱 없이 기획서 + DDL만으로 설계 |
-| `sources.ddl` | DDL 없이 기획서 기반으로 테이블 구조 추론 |
-| `backend.framework` | README.md / package.json / build.gradle 등에서 추론 |
-| `frontend.framework` | README.md / package.json 등에서 추론 |
-| `project.readme` | 프로젝트 루트에서 README.md 자동 탐색 |
-
-### 9.5 다중 프로젝트 대응
-
-모노레포 또는 별도 저장소 구조 모두 지원한다.
-
-- `backend.root`와 `frontend.root`가 다른 경로일 수 있다
-- 각각의 README.md가 별도로 존재할 수 있다
-- 설정에서 명시된 경로를 기준으로 탐색한다
+설정 누락 시 동작 표, 다중 프로젝트 대응 등 상세 규칙은 이 스킬 디렉토리의
+**`reference.md`** 를 읽고 따른다 (설정이 불완전하거나 모노레포 구조일 때 필수).
 
 ---
 
