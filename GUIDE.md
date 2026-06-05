@@ -24,7 +24,7 @@ riskzero-si는 **기획서 + 퍼블리싱 + DDL** 세 가지 입력으로 SI 기
 
 - **무엇으로** 기능을 시작하는가 (기획서·퍼블리싱·DDL — 입력 소스의 준비)
 - **어떻게** 만들어야 게이트를 통과하고 ship 할 수 있는가 (STEP 1~8의 표준 흐름)
-- **누가 무엇으로** 그 작업을 도와주는가 (riskzero-si 9개 스킬 + gstack 래핑의 역할 구분)
+- **누가 무엇으로** 그 작업을 도와주는가 (riskzero-si 10개 스킬 + gstack 래핑의 역할 구분)
 
 세 질문에 답이 모이는 한 사이클을 본 매뉴얼은 *기능(feature)* 이라 부른다. 기능은 STEP 1부터 STEP 8까지 흐른다. 그 흐름이 PART II의 척추다.
 
@@ -180,7 +180,7 @@ riskzero-si는 *단계와 게이트를 아는 SI 전문 PM*, gstack은 *조사·
 
 ### 2.1 riskzero-si — SI 전문 PM 역할
 
-9개 스킬로 구성된다. 1개 오케스트레이터(`/riskzero-si-pipeline`)가 8개 단계 스킬을 순차 호출하며, 단계 간 데이터 흐름과 게이트(진행/중단/복귀 판단)를 관리한다. 각 단계 스킬은 단독 호출도 가능하다(18장).
+10개 스킬로 구성된다. 1개 오케스트레이터(`/riskzero-si-pipeline`)가 8개 단계 스킬을 순차 호출하며, 가이드 안내용 `/riskzero-si-help`가 본 문서를 데이터 소스로 동작하며, 단계 간 데이터 흐름과 게이트(진행/중단/복귀 판단)를 관리한다. 각 단계 스킬은 단독 호출도 가능하다(18장).
 
 ### 2.2 gstack — 외부 용역 역할
 
@@ -333,7 +333,7 @@ cd ~/riskzero-si && ./setup --host claude   # Codex면 --host codex
 
 ### 4.4 동작 확인
 
-새 세션에서 스킬 목록에 `riskzero-si-*` 9개가 보이고, si-config.yml의 `sources.wireframe` 경로에 실제 기획서 파일이 있으면 준비 완료.
+새 세션에서 스킬 목록에 `riskzero-si-*` 10개가 보이고, si-config.yml의 `sources.wireframe` 경로에 실제 기획서 파일이 있으면 준비 완료.
 
 ### 4.5 첫 명령 호출
 
@@ -693,7 +693,7 @@ QA 체크리스트 기반으로 버그를 조사하고 수정한다. gstack `/in
 
 | 역할 | 주로 사용하는 명령 | 설명 |
 |---|---|---|
-| **신입 개발자** | `/riskzero-si-pipeline {기능명}` | 전체 자동 — 게이트가 품질을 지켜준다 |
+| **신입 개발자** | `/riskzero-si-help`로 학습 → `/riskzero-si-pipeline {기능명}` | 전체 자동 — 게이트가 품질을 지켜준다 |
 | **경험 개발자** | `/riskzero-si-plan` → 직접 구현 → `/riskzero-si-review` | 계획과 리뷰만 AI, 구현은 직접 |
 | **리뷰어** | `/riskzero-si-review` + `/riskzero-si-pr-review` | 표준(우리 규칙) + 안전성 2종 리뷰 |
 | **QA 담당** | `/riskzero-si-qa-checklist` → `/riskzero-si-browse` | 체크리스트 생성 → 브라우저 검증·증적 |
@@ -931,6 +931,7 @@ flowchart TD
 | "버그 조사", "버그 수정", "qa" | `/riskzero-si-qa` | 체크리스트 없는 일반 버그 수정 |
 | "최종 검증", "브라우저 테스트" | `/riskzero-si-browse` | 일반 브라우저 테스트 → gstack `/browse`, `/qa-only` |
 | "SI 파이프라인", "기능 개발" | `/riskzero-si-pipeline` | 일반적인 기능 개발 요청 |
+| "riskzero-si 사용법", "SI 파이프라인 가이드" | `/riskzero-si-help` | riskzero-si 무관 일반 도움말/문서 질문 |
 
 ---
 
@@ -953,7 +954,7 @@ git clone https://github.com/wody-hub/riskzero-riskzero-si.git ~/riskzero-si
 cd ~/riskzero-si && ./setup --host codex   # 또는 --host claude
 ```
 
-setup은 `~/.codex/skills/`(또는 `~/.claude/skills/`)에 `riskzero-si-*` 9개 심링크를 만든다. **새 세션 재시작** 후 스킬이 로드된다.
+setup은 `~/.codex/skills/`(또는 `~/.claude/skills/`)에 `riskzero-si-*` 10개 심링크를 만든다. **새 세션 재시작** 후 스킬이 로드된다.
 
 ### C.2 업데이트
 
@@ -1022,7 +1023,9 @@ cd ~/riskzero-si && git pull
   ├── setup                            # 듀얼 호스트 설치 스크립트
   ├── si-config.template.yml           # 프로젝트 설정 템플릿
   ├── README.md / MANUAL.md            # 설치·사용 문서
+  ├── GUIDE.md                         # 워크플로우 가이드 (본 문서, help 스킬의 데이터)
   ├── riskzero-si-pipeline/SKILL.md
+  ├── riskzero-si-help/SKILL.md        # 가이드 안내 라우터
   ├── riskzero-si-plan/                # SKILL.md + frameworks.md + reference.md
   ├── riskzero-si-impl/                # SKILL.md + be-developer.md + fe-developer.md
   ├── riskzero-si-qa-checklist/        # SKILL.md + scripts.md + framework-hints.md + qa-tester.md
