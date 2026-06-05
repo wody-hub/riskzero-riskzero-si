@@ -237,32 +237,7 @@ python-pptx를 사용하여 슬라이드에서 추출:
 - 검색 조건 목록
 - 버튼 및 네비게이션 플로우
 
-```python
-# python-pptx 분석 스크립트 (Bash로 실행)
-python3 -c "
-from pptx import Presentation
-from pptx.util import Inches
-import json, sys
-
-prs = Presentation(sys.argv[1])
-result = {'slides': []}
-for i, slide in enumerate(prs.slides):
-    slide_data = {'number': i+1, 'shapes': []}
-    for shape in slide.shapes:
-        if shape.has_table:
-            table = shape.table
-            rows = []
-            for row in table.rows:
-                rows.append([cell.text.strip() for cell in row.cells])
-            slide_data['shapes'].append({'type': 'table', 'rows': rows})
-        elif shape.has_text_frame:
-            text = shape.text_frame.text.strip()
-            if text:
-                slide_data['shapes'].append({'type': 'text', 'content': text})
-    result['slides'].append(slide_data)
-print(json.dumps(result, ensure_ascii=False, indent=2))
-" "$PPTX_PATH"
-```
+분석 스크립트는 이 스킬 디렉토리의 `scripts.md` §1을 읽고 실행한다.
 
 ---
 
@@ -474,14 +449,8 @@ print(json.dumps(result, ensure_ascii=False, indent=2))
 
 #### 사전 준비
 
-```bash
-# 1. 로그인하여 토큰 획득
-# 사용자에게 테스트 계정 정보를 확인한다 (ID/PW)
-TOKEN=$(curl -s -X POST {config.server.backend.baseUrl}{config.auth.loginApi} \
-  -H 'Content-Type: application/json' \
-  -d '{"{config.auth.loginFields.username}":"$ID","{config.auth.loginFields.password}":"$PW"}' \
-  | jq -r '.{config.auth.tokenField}')
-```
+로그인 토큰 획득 절차는 이 스킬 디렉토리의 `scripts.md` §2-1을 읽고 실행한다.
+사용자에게 테스트 계정 정보(ID/PW)를 먼저 확인한다.
 
 #### 데이터 생성 전략
 
@@ -492,52 +461,11 @@ TOKEN=$(curl -s -X POST {config.server.backend.baseUrl}{config.auth.loginApi} \
   - 셀렉트/코드 필드: 가능한 모든 옵션 골고루 분배
   - 파일 첨부: 5건 정도에만 첨부
 
-#### 파일 첨부 더미 생성
+#### 파일 첨부 더미 생성 및 데이터 등록
 
-```bash
-# 최소 크기 테스트 파일 생성
-# 1x1 투명 PNG (68 bytes)
-printf '\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\nIDATx\x9cc\x00\x01\x00\x00\x05\x00\x01\r\n\xb4\x00\x00\x00\x00IEND\xaeB`\x82' > /tmp/qa-test.png
-
-# 빈 PDF
-echo '%PDF-1.0
-1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj
-2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj
-3 0 obj<</Type/Page/MediaBox[0 0 3 3]>>endobj
-xref
-0 4
-0000000000 65535 f
-0000000009 00000 n
-0000000058 00000 n
-0000000115 00000 n
-trailer<</Size 4/Root 1 0 R>>
-startxref
-190
-%%EOF' > /tmp/qa-test.pdf
-
-# 파일 업로드 → docId 획득
-DOC_ID=$(curl -s -X POST {config.server.backend.baseUrl}{config.dummyData.fileUploadApi} \
-  -H "{config.auth.tokenHeader}: {config.auth.tokenPrefix}$TOKEN" \
-  -F "files=@/tmp/qa-test.png" | jq -r '.docId')
-```
-
-#### 데이터 등록
-
-```bash
-# DTO 구조에 맞게 N건 등록
-for i in $(seq 1 {config.dummyData.count}); do
-  curl -s -X POST {config.server.backend.baseUrl}/api/{endpoint} \
-    -H "{config.auth.tokenHeader}: {config.auth.tokenPrefix}$TOKEN" \
-    -H 'Content-Type: application/json' \
-    -d "{
-      \"field1\": \"{prefix}$(printf '%03d' $i) 테스트 데이터 $i\",
-      ...
-    }"
-  sleep 0.2
-done
-```
-
-> 실제 필드명과 값은 DTO 분석 결과를 기반으로 동적 생성한다.
+파일 첨부 더미 생성(PNG/PDF + 업로드)은 `scripts.md` §2-2,
+N건 데이터 등록 루프는 `scripts.md` §2-3을 읽고 실행한다.
+실제 필드명과 값은 DTO 분석 결과를 기반으로 동적 생성한다.
 
 ### 6-2. 브라우저 테스트
 
@@ -602,42 +530,5 @@ qa-tester 에이전트 지침(`riskzero-si-qa-checklist/qa-tester.md`)을 참조
 
 ## 참고: 프레임워크별 파일 탐색 힌트
 
-### React (Vite)
-- 라우트: `src/_routes.tsx` → `pages/{group}/_route.tsx`
-- 페이지: `pages/{group}/{domain}/index.tsx`
-- 상세: `pages/{group}/{domain}/components/*Detail.tsx`
-- API: `pages/{group}/{domain}/*Api.ts`
-
-### Vue
-- 라우트: `src/router/index.ts` → `views/` 또는 `pages/`
-- 페이지: `views/{domain}/index.vue` 또는 `List.vue`
-- 상세: `views/{domain}/Detail.vue`
-- API: `api/{domain}.ts` 또는 `services/{domain}.ts`
-
-### Next.js
-- 라우트: `app/` (App Router) 또는 `pages/` (Pages Router)
-- 페이지: `app/{domain}/page.tsx`
-- API: `app/api/{domain}/route.ts`
-
-### Angular
-- 라우트: `app-routing.module.ts` → `{module}-routing.module.ts`
-- 페이지: `{domain}/{domain}.component.ts`
-- API: `services/{domain}.service.ts`
-
-### Spring Boot (Java/Kotlin)
-- Controller: `api/**/{domain}/controller/*Controller.java`
-- Service: `api/**/{domain}/service/*ServiceImpl.java`
-- Mapper: `api/**/{domain}/mapper/*Mapper.java`
-- DTO: `api/**/{domain}/model/dto/*Dto.java`
-- Mapper XML: `resources/mapper/**/{domain}/*Mapper.xml`
-
-### Express / NestJS
-- Controller: `src/{domain}/{domain}.controller.ts`
-- Service: `src/{domain}/{domain}.service.ts`
-- DTO: `src/{domain}/dto/*.dto.ts`
-
-### Django
-- View: `{app}/views.py`
-- Serializer: `{app}/serializers.py`
-- URL: `{app}/urls.py`
-- Model: `{app}/models.py`
+Step 1에서 관련 파일 탐색 시, 이 스킬 디렉토리의 `framework-hints.md`에서
+프로젝트 프레임워크에 해당하는 섹션만 읽고 참고한다.
