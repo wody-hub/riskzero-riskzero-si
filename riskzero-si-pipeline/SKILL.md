@@ -231,20 +231,20 @@ Claude Code를 쓰는 경우:
 > 💡 컨텍스트가 길어졌다면 `/clear` 후 위 명령어를 그대로 붙여넣으세요. 다음 단계는 `.si-planning/{기능명}/` 산출물을 읽어 단독 실행됩니다.
 > ---
 
-게이트가 FAIL/BLOCKER/CRITICAL이라 이전 단계로 되돌아가야 하면, "다음 단계" 자리에 **복귀 명령어**를 넣고 사유를 한 줄로 적는다. (예: `이슈로 인해 되돌아가기: /riskzero-si-plan {기능명}` — CRITICAL 계획 결함)
+**리뷰 단계 진행 게이트(공통):** 리뷰 단계(2/4/5/7)는 **차단 발견사항이 0건일 때만** 다음 단계로 진행한다. **차단 = Medium 이상 심각도 / 영역 FAIL / BLOCKER / TDD 증거 FAIL**(판정 라벨이 아니라 발견사항 기준 — `PASS` 라벨도 Medium을 포함할 수 있으므로 라벨만으로 통과 판단 금지). 차단이 1건이라도 있으면 "다음 단계" 자리에 **조치 후 재리뷰/복귀 명령어**를 넣고 사유를 한 줄로 적는다. (예: `이슈로 인해 되돌아가기: /riskzero-si-plan {기능명}` — Medium 이상 계획 결함). 사용자가 명시적으로 수용/보류한 항목은 산출물에 사유·후속 추적 위치를 기록한 경우에 한해 차단에서 제외한다. Low/정보성은 비차단(권고).
 
 ### 단계별 "다음 명령어" 맵
 
-| 방금 끝낸 단계 | 게이트 PASS 시 다음 명령어 | 게이트 실패 시 복귀 명령어 |
+| 방금 끝낸 단계 | 게이트 통과(차단 0건) 시 다음 명령어 | 차단 ≥1건 시 조치/복귀 명령어 |
 |----------------|----------------------------|----------------------------|
 | 1 plan | `/riskzero-si-plan-review {기능명}` | — |
-| 2 plan-review | `/riskzero-si-impl {기능명}` | (CRITICAL) `/riskzero-si-plan {기능명}` |
+| 2 plan-review | `/riskzero-si-impl {기능명}` | 계획 수정 `/riskzero-si-plan {기능명}` → 재리뷰 `/riskzero-si-plan-review {기능명}` |
 | 3 impl | `/riskzero-si-review {기능명}` | (빌드/린트 실패) 수정 후 `/riskzero-si-impl {기능명}` |
-| 4 review | `/riskzero-si-pr-review {기능명}` | (ERROR) 코드 수정 후 `/riskzero-si-review {기능명}` |
-| 5 pr-review | `/riskzero-si-qa-checklist {메뉴명 또는 URL}` | (BLOCKER) 코드 수정 후 `/riskzero-si-pr-review {기능명}` |
+| 4 review | `/riskzero-si-pr-review {기능명}` | 코드 수정 후 재리뷰 `/riskzero-si-review {기능명}` |
+| 5 pr-review | `/riskzero-si-qa-checklist {메뉴명 또는 URL}` | 코드 수정 후 재리뷰 `/riskzero-si-pr-review {기능명}` |
 | 6 qa-checklist | `/riskzero-si-qa {기능명}` | — |
-| 7 qa | `/riskzero-si-browse {기능명 또는 URL}` | (5회+ 미해결) 사용자 보고 |
-| 8 browse | 🎉 파이프라인 완료 | (CRITICAL) `/riskzero-si-qa {기능명}` |
+| 7 qa | `/riskzero-si-browse {기능명 또는 URL}` | (전 항목 PASS까지 내부 반복 / 5회+ 미해결) 사용자 보고 |
+| 8 browse | 🎉 파이프라인 완료 | (차단 발견) `/riskzero-si-qa {기능명}` |
 
 ### `/clear` 운용 정책 (단독 실행 안전성)
 
