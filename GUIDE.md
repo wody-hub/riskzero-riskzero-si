@@ -264,10 +264,10 @@ flowchart TD
     S2 -.CRITICAL.-> S1
     S3 -->|빌드 성공| S4[STEP 4 표준 리뷰<br/>/riskzero-si-review]
     S3 -.빌드 3회 실패<br/>사용자 보고.-> S3
-    S4 -->|PASS/WARNING| S5[STEP 5 PR 리뷰<br/>/riskzero-si-pr-review]
-    S4 -.ERROR.-> S3
-    S5 -->|BLOCKER 없음| S6[STEP 6 QA 체크리스트<br/>/riskzero-si-qa-checklist]
-    S5 -.BLOCKER.-> S3
+    S4 -->|차단 0건| S5[STEP 5 PR 리뷰<br/>/riskzero-si-pr-review]
+    S4 -.차단 Medium↑/FAIL.-> S3
+    S5 -->|차단 0건| S6[STEP 6 QA 체크리스트<br/>/riskzero-si-qa-checklist]
+    S5 -.차단 Medium↑/BLOCKER.-> S3
     S6 --> S7[STEP 7 버그 수정<br/>/riskzero-si-qa]
     S7 -->|전 항목 PASS| S8[STEP 8 최종 검증<br/>/riskzero-si-browse]
     S7 -.5회 실패<br/>사용자 판단.-> S7
@@ -482,8 +482,8 @@ STEP 1의 계획서를 아키텍처·보안 관점에서 리뷰한다. gstack `/
 | **명령** | `/riskzero-si-plan-review` *(파이프라인 실행 시 🤖 자동)* |
 | **점검** | README 규칙 반영 · API 네이밍 · DTO/VO 분리 · 권한 체크 설계 · 유효성 검증 레이어 · (gstack 위임) 아키텍처/데이터 흐름/엣지 케이스 |
 | **산출** | `.si-planning/{기능명}/plan-review.md` |
-| **진행** | 리뷰 PASS, 또는 지적 사항 반영 후 재리뷰 통과 |
-| **중단·복귀** | **CRITICAL 이슈 → STEP 1로 복귀**하여 계획 수정 |
+| **진행** | **차단 0건**(체크 항목 전부 PASS, 잔여는 Low/권고만) |
+| **중단·복귀** | **차단(FAIL 항목·수정필요 지적) ≥1건 → STEP 1로 복귀**하여 계획 수정 후 재리뷰 (차단 0건까지 반복) |
 
 > 💡 여기서의 복귀는 비용이 아니라 절약이다. STEP 3 이후 발견되는 같은 문제는 코드·테스트·리뷰를 전부 다시 돌리게 만든다.
 
@@ -542,8 +542,8 @@ STEP 1의 계획서를 아키텍처·보안 관점에서 리뷰한다. gstack `/
 | **명령** | `/riskzero-si-review [파일/디렉토리...]` *(인자 없으면 변경분 전체 · 파이프라인 실행 시 🤖 자동)* |
 | **점검 영역** | ① **아키텍처** — 레이어 분리·패키지 구조·트랜잭션·보안(OWASP) ② **코딩 컨벤션** — 네이밍·null 처리·import·예외 처리 ③ **API 설계** — REST·DTO/VO·쿼리 ④ **TDD 증거** — RED/GREEN 기록 |
 | **산출** | `.si-planning/{기능명}/code-review.md` |
-| **진행** | 전 항목 PASS 또는 WARNING 이하 |
-| **중단·복귀** | **ERROR 항목 → STEP 3 코드 수정 후 재리뷰** |
+| **진행** | **차단 0건** — 판정 라벨이 아니라 발견사항 기준(PASS 라벨도 Medium 포함 가능). 차단 = **Critical/High/Medium·영역 FAIL** |
+| **중단·복귀** | **차단 ≥1건 → STEP 3 코드 수정 후 `/riskzero-si-review` 재리뷰** (차단 0건까지 반복). Low/권고는 비차단. 명시적 수용 항목은 사유 기록 시 차단 제외 |
 
 > 💡 gstack `/review`와의 역할 분담: 이 단계는 "우리 규칙", STEP 5는 "코드 안전성". 둘은 상호보완이며 중복이 아니다.
 
@@ -564,8 +564,8 @@ git diff 기반으로 **"코드가 안전한가?"** 를 점검한다. gstack `/r
 | **명령** | `/riskzero-si-pr-review` *(파이프라인 실행 시 🤖 자동)* |
 | **점검** | 로직 정확성·엣지 케이스 / 보안 취약점(SQL Injection·XSS) / 성능(N+1, 불필요 재렌더링) / 에러 핸들링 / TDD·리서치 증거 |
 | **산출** | `.si-planning/{기능명}/pr-review.md` |
-| **진행** | BLOCKER 없음 |
-| **중단·복귀** | **BLOCKER → 코드 수정 후 재리뷰** |
+| **진행** | **차단 0건** — 차단 = **Medium 이상 / BLOCKER / TDD 증거 FAIL** |
+| **중단·복귀** | **차단 ≥1건 → 코드 수정 후 `/riskzero-si-pr-review` 재리뷰** (차단 0건까지 반복). TDD 증거 부재면 STEP 3 복귀. Low/권고는 비차단 |
 
 > ⚠ diff 기준 확인 — 구현이 여러 커밋이면 base 브랜치 대비 diff인지 확인한다. `HEAD~1`만 보면 일부 변경이 리뷰에서 빠진다.
 
@@ -652,10 +652,10 @@ QA 체크리스트 기반으로 버그를 조사하고 수정한다. gstack `/in
 기능 하나가 "완료"인지 마지막으로 확인하는 체크리스트. 모두 ✓여야 완료다.
 
 - [ ] `.si-planning/{기능명}/` 에 산출물 11종 존재 — discussion / (research) / implementation-plan / tdd-plan / plan-review / tdd-report / code-review / pr-review / qa-checklist / qa-report / final-report
-- [ ] STEP 2 계획 리뷰 — CRITICAL 0건으로 통과
+- [ ] STEP 2 계획 리뷰 — 차단(FAIL 항목·수정필요) 0건으로 통과
 - [ ] STEP 3 — 빌드·린트 통과 + `tdd-report.md`에 RED/GREEN 증거 기록
-- [ ] STEP 4 표준 리뷰 — ERROR 0건
-- [ ] STEP 5 PR 리뷰 — BLOCKER 0건
+- [ ] STEP 4 표준 리뷰 — 차단(Medium 이상·영역 FAIL) 0건
+- [ ] STEP 5 PR 리뷰 — 차단(Medium 이상·BLOCKER·TDD FAIL) 0건
 - [ ] STEP 7 — QA 체크리스트 전 항목 PASS
 - [ ] STEP 8 — `evidence/screenshots/` 증적 + `final-report.md` 생성
 - [ ] 생성한 더미데이터 정리 여부 결정 (`[테스트]` prefix 검색)
@@ -777,13 +777,15 @@ riskzero-si는 **SI 파이프라인 전용**이다. 다음 작업에는 쓰지 �
 
 **읽는 시간** 8분 · **사용 시점** 게이트에서 막혔을 때 / 복귀 경로가 헷갈릴 때
 
-| 게이트 | 판정 | PASS 조건 | FAIL 시 복귀 |
+> 리뷰 게이트(STEP 2/4/5)는 **판정 라벨이 아니라 발견사항 심각도**로 판단한다. **차단 = Medium 이상 / 영역 FAIL / BLOCKER / TDD 증거 FAIL** (PASS 라벨도 Medium 포함 가능). 차단 0건일 때만 진행하고, 1건↑이면 조치→재리뷰를 차단 0건까지 반복한다. Low/권고는 비차단, 명시적 수용 항목은 사유 기록 시 차단 제외.
+
+| 게이트 | 판정 | 진행 조건 | 차단 시 복귀 |
 |---|---|---|---|
 | STEP 1 → 2 | 사용자 승인 | 계획서 확인·승인 | 입력 누락 시 경로 확인 |
-| STEP 2 → 3 | 리뷰 판정 | PASS 또는 지적 반영 후 재통과 | **CRITICAL → STEP 1** |
+| STEP 2 → 3 | 리뷰 판정 | 차단 0건(FAIL 항목·수정필요 지적 없음) | **차단 ≥1건 → STEP 1** |
 | STEP 3 → 4 | 빌드·린트 | buildCmd + lintCmd 통과 | 3회 실패 → 사용자 보고 |
-| STEP 4 → 5 | 표준 리뷰 | PASS / WARNING 이하 | **ERROR → STEP 3** |
-| STEP 5 → 6 | 안전성 리뷰 | BLOCKER 없음 | BLOCKER → 코드 수정 후 재리뷰 |
+| STEP 4 → 5 | 표준 리뷰 | 차단 0건(Medium 이상·영역 FAIL 없음) | **차단 ≥1건 → STEP 3** |
+| STEP 5 → 6 | 안전성 리뷰 | 차단 0건(Medium 이상·BLOCKER·TDD FAIL 없음) | **차단 ≥1건 → 코드 수정 후 재리뷰** |
 | STEP 6 → 7 | 사용자 확인 | 체크리스트 확인 | (항상 진행) |
 | STEP 7 → 8 | QA 결과 | 전 항목 PASS | 5회 실패 → 사용자 판단 |
 | STEP 8 → 완료 | 최종 검증 | 전 항목 검증 완료 | **CRITICAL → STEP 7** |

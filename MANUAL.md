@@ -310,9 +310,9 @@ cp ~/.claude/skills/riskzero-si/si-config.template.yml .claude/si-config.yml
 /riskzero-si-plan-review
 ```
 
-**결과**:
-- PASS/WARN → Step 3으로 진행
-- FAIL → Step 1로 돌아가 계획 수정
+**진행 게이트**: 판정 라벨이 아니라 **차단 발견사항(체크 항목 FAIL·수정필요 지적) 건수**로 진행을 판단한다.
+- **차단 0건**(전 항목 PASS, 잔여 Low/권고만) → Step 3으로 진행
+- **차단 ≥1건** → Step 1(`/riskzero-si-plan`)로 돌아가 수정 후 재리뷰 (차단 0건까지 반복). WARN(Low/권고만)은 비차단
 
 ---
 
@@ -357,6 +357,10 @@ cp ~/.claude/skills/riskzero-si/si-config.template.yml .claude/si-config.yml
 
 **핵심**: "우리 프로젝트 규칙을 따르는가?"를 점검합니다.
 
+**진행 게이트**: 판정 라벨(PASS/CONDITIONAL PASS/FAIL)이 아니라 **발견사항 심각도**로 진행을 판단합니다(PASS 라벨도 Medium을 포함할 수 있음). 차단 = **Critical/High/Medium·영역 FAIL**.
+- **차단 0건**(잔여 Low/권고만) → Step 5로 진행
+- **차단 ≥1건** → 코드 수정 후 `/riskzero-si-review` 재리뷰 (차단 0건까지 반복). 명시적 수용 항목은 `code-review.md`에 사유·추적 위치 기록 시 차단 제외
+
 ---
 
 ### Step 5: `/riskzero-si-pr-review` — PR diff 안전성 리뷰
@@ -375,6 +379,10 @@ cp ~/.claude/skills/riskzero-si/si-config.template.yml .claude/si-config.yml
 ```
 
 **핵심**: "코드가 안전한가?"를 점검합니다. Step 4와 상호보완 관계입니다.
+
+**진행 게이트**: 차단 = **Medium 이상 / BLOCKER / TDD 증거 FAIL**.
+- **차단 0건**(잔여 Low/권고만) → Step 6으로 진행
+- **차단 ≥1건** → 코드 수정 후 `/riskzero-si-pr-review` 재리뷰 (차단 0건까지 반복). TDD 증거 부재면 Step 3 복귀
 
 ---
 
@@ -473,10 +481,10 @@ cp ~/.claude/skills/riskzero-si/si-config.template.yml .claude/si-config.yml
 
 **AI가 하는 일**: 논의 결정사항, 리서치 반영/스킵 사유, TDD 계획, 아키텍처/보안/표준 관점을 함께 검토하고 PASS/WARN/FAIL 판정합니다.
 
-**결과별 대응**:
-- **PASS**: 바로 Step 3으로 진행
-- **WARN**: 권고사항을 읽고, 필요하면 계획 수정 후 진행
-- **FAIL**: CRITICAL 이슈 목록을 확인하고, `/riskzero-si-plan`을 재실행하여 계획 수정
+**결과별 대응** (게이트는 발견사항 기준 — 차단 = FAIL 항목·수정필요 지적):
+- **차단 0건 (전 항목 PASS, 잔여 Low/권고만)**: 바로 Step 3으로 진행
+- **WARN (Low/권고만)**: 비차단 — 권고사항을 읽고 진행(필요 시 반영)
+- **차단 ≥1건 (FAIL 등)**: `/riskzero-si-plan`을 재실행해 계획을 수정한 뒤 재리뷰. 차단 0건이 될 때까지 반복
 
 ### Step 3: 코드 구현 — "빌드 성공이 기본"
 
