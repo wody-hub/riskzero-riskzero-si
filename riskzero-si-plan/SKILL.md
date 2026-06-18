@@ -889,3 +889,33 @@ tb_main_table (1) ──── (N) tb_detail_table
 
 각 단계에서 판단이 어려운 사항은 사용자에게 질문하되,
 가능한 한 분석 결과에 기반하여 자율적으로 설계한다.
+
+---
+
+## 단계 종료 시 필수 출력 (단계 종료 푸터)
+
+이 스킬은 riskzero-si 8단계 파이프라인의 **Step 1**이다. 계획 산출물 저장을 마치면 답변 맨 끝에 아래 푸터를 반드시 출력한다. (`{기능명}`은 실제 값으로 채운다.)
+
+> ---
+> ### 📍 파이프라인 진행 현황 — `{기능명}`
+>
+> | # | 단계 | 명령 | 상태 |
+> |---|------|------|------|
+> | 1 | 논의+계획 | `riskzero-si-plan` | 👉 방금 완료 |
+> | 2 | 계획 리뷰 | `riskzero-si-plan-review` | 👉 다음 |
+> | 3 | 구현(TDD) | `riskzero-si-impl` | ⬜ |
+> | 4 | 표준 리뷰 | `riskzero-si-review` | ⬜ |
+> | 5 | PR 리뷰 | `riskzero-si-pr-review` | ⬜ |
+> | 6 | QA 체크리스트 | `riskzero-si-qa-checklist` | ⬜ |
+> | 7 | 버그 수정 | `riskzero-si-qa` | ⬜ |
+> | 8 | 최종 검증 | `riskzero-si-browse` | ⬜ |
+>
+> **방금 완료:** Step 1 — 산출물: `.si-planning/{기능명}/discussion.md`, `implementation-plan.md`, `tdd-plan.md`(+ `research.md` 선택)
+>
+> **▶️ 다음 단계 — 아래 명령어를 복사해 실행하세요:**
+> ```
+> /riskzero-si-plan-review {기능명}
+> ```
+>
+> 💡 컨텍스트가 길어졌다면 `/clear` 후 위 명령어를 그대로 붙여넣으세요. 다음 단계는 `.si-planning/{기능명}/` 산출물을 읽어 단독 실행됩니다.
+> ---

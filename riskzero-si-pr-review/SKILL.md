@@ -87,3 +87,31 @@ gstack 리뷰 결과를 `.si-planning/{기능명}/pr-review.md`에 저장한다.
 - **BLOCKER 발견**: 코드를 수정한 후 재리뷰
 - **TDD 증거 부재**: `testing.evidenceRequired: true`이면 BLOCKER로 취급하고 Step 3으로 복귀
 - 수정 후 `/riskzero-si-pr-review`를 다시 실행하여 BLOCKER가 해소되었는지 확인
+
+---
+
+## 단계 종료 시 필수 출력 (단계 종료 푸터)
+
+이 스킬은 riskzero-si 8단계 파이프라인의 **Step 5**이다. 리뷰 산출물 저장 후 답변 맨 끝에 아래 푸터를 반드시 출력한다. (`{기능명}`은 실제 값으로 채운다.)
+
+> ---
+> ### 📍 파이프라인 진행 현황 — `{기능명}`
+>
+> | # | 단계 | 명령 | 상태 |
+> |---|------|------|------|
+> | 1~4 | 계획~표준리뷰 | … | ✅ |
+> | 5 | PR 리뷰 | `riskzero-si-pr-review` | 👉 방금 완료 |
+> | 6 | QA 체크리스트 | `riskzero-si-qa-checklist` | 👉 다음 |
+> | 7 | 버그 수정 | `riskzero-si-qa` | ⬜ |
+> | 8 | 최종 검증 | `riskzero-si-browse` | ⬜ |
+>
+> **방금 완료:** Step 5 — 산출물: `.si-planning/{기능명}/pr-review.md` (BLOCKER 유무)
+>
+> **▶️ 다음 단계 — 아래 명령어를 복사해 실행하세요:**
+> ```
+> /riskzero-si-qa-checklist {메뉴명 또는 URL}
+> ```
+> *(⚠️ Step 6는 기능명이 아니라 검증 대상 **메뉴명 / URL / 화면ID**를 인자로 받습니다. BLOCKER가 있으면 먼저 코드 수정 후 `/riskzero-si-pr-review {기능명}`으로 재리뷰하세요.)*
+>
+> 💡 컨텍스트가 길어졌다면 `/clear` 후 위 명령어를 그대로 붙여넣으세요. 다음 단계는 구현된 화면/라우트를 분석해 단독 실행됩니다.
+> ---

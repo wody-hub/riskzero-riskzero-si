@@ -29,6 +29,7 @@ allowed-tools:
 - `/tmp`는 임시 파일에만 사용하며, 최종 체크리스트/리포트/증거는 기능별 산출물 디렉토리로 복사하거나 직접 저장한다
 - 사용자 확인 없이 다음 단계로 넘어가지 않는다
 - 멀티 에이전트나 Dynamic Workflow를 쓰더라도 단계 게이트와 산출물 계약은 유지한다
+- **매 단계 종료 시 [단계 종료 푸터](#단계-종료-푸터-필수-출력-규약)(전체 진행 현황 + 다음 단계 명령어 + `/clear` 안내)를 답변 맨 끝에 반드시 출력한다.** 이 푸터가 없으면 그 단계는 완료된 것이 아니다.
 
 ---
 
@@ -190,6 +191,67 @@ Claude Code를 쓰는 경우:
 | 6 | `/riskzero-si-qa-checklist {기능명}` | QA 체크리스트 생성 | `.si-planning/{기능명}/qa-checklist.md`, `qa-report.md`(테스트 실행 시) |
 | 7 | `/riskzero-si-qa` | 버그 조사 및 수정 | 수정된 소스 파일들 |
 | 8 | `/riskzero-si-browse` | 브라우저 최종 검증 | `.si-planning/{기능명}/final-report.md`, `evidence/screenshots/` |
+
+---
+
+## 단계 종료 푸터 (필수 출력 규약)
+
+오케스트레이터와 **모든 서브 스킬**은 한 단계를 끝낼 때마다 아래 "단계 종료 푸터"를 답변 맨 끝에 반드시 출력한다. 이 푸터가 없으면 그 단계는 완료된 것이 아니다.
+
+**목적:**
+- 사용자가 전체 8단계 중 지금 어디에 있는지 한눈에 파악한다
+- 다음에 입력할 명령어를 **복사만 하면 되도록** 완성된 형태로 제공한다
+- `/clear`로 컨텍스트를 비운 뒤에도 다음 단계를 바로 이어갈 수 있게 한다
+
+### 푸터 출력 형식
+
+답변 맨 끝에 아래 형식을 그대로 출력한다. `{기능명}`, 진행 표시(✅ 완료 / 👉 현재·다음 / ⬜ 대기), 산출물 경로, 다음 명령어는 실제 값으로 채운다.
+
+> ---
+> ### 📍 파이프라인 진행 현황 — `{기능명}`
+>
+> | # | 단계 | 명령 | 상태 |
+> |---|------|------|------|
+> | 1 | 논의+계획 | `riskzero-si-plan` | ✅ |
+> | 2 | 계획 리뷰 | `riskzero-si-plan-review` | ✅ |
+> | 3 | 구현(TDD) | `riskzero-si-impl` | 👉 방금 완료 |
+> | 4 | 표준 리뷰 | `riskzero-si-review` | 👉 다음 |
+> | 5 | PR 리뷰 | `riskzero-si-pr-review` | ⬜ |
+> | 6 | QA 체크리스트 | `riskzero-si-qa-checklist` | ⬜ |
+> | 7 | 버그 수정 | `riskzero-si-qa` | ⬜ |
+> | 8 | 최종 검증 | `riskzero-si-browse` | ⬜ |
+>
+> **방금 완료한 단계:** Step 3 구현 — 산출물: `.si-planning/{기능명}/tdd-report.md` + 생성된 소스 파일
+>
+> **▶️ 다음 단계 — 아래 명령어를 복사해 실행하세요:**
+> ```
+> /riskzero-si-review {기능명}
+> ```
+>
+> 💡 컨텍스트가 길어졌다면 `/clear` 후 위 명령어를 그대로 붙여넣으세요. 다음 단계는 `.si-planning/{기능명}/` 산출물을 읽어 단독 실행됩니다.
+> ---
+
+게이트가 FAIL/BLOCKER/CRITICAL이라 이전 단계로 되돌아가야 하면, "다음 단계" 자리에 **복귀 명령어**를 넣고 사유를 한 줄로 적는다. (예: `이슈로 인해 되돌아가기: /riskzero-si-plan {기능명}` — CRITICAL 계획 결함)
+
+### 단계별 "다음 명령어" 맵
+
+| 방금 끝낸 단계 | 게이트 PASS 시 다음 명령어 | 게이트 실패 시 복귀 명령어 |
+|----------------|----------------------------|----------------------------|
+| 1 plan | `/riskzero-si-plan-review {기능명}` | — |
+| 2 plan-review | `/riskzero-si-impl {기능명}` | (CRITICAL) `/riskzero-si-plan {기능명}` |
+| 3 impl | `/riskzero-si-review {기능명}` | (빌드/린트 실패) 수정 후 `/riskzero-si-impl {기능명}` |
+| 4 review | `/riskzero-si-pr-review {기능명}` | (ERROR) 코드 수정 후 `/riskzero-si-review {기능명}` |
+| 5 pr-review | `/riskzero-si-qa-checklist {메뉴명 또는 URL}` | (BLOCKER) 코드 수정 후 `/riskzero-si-pr-review {기능명}` |
+| 6 qa-checklist | `/riskzero-si-qa {기능명}` | — |
+| 7 qa | `/riskzero-si-browse {기능명 또는 URL}` | (5회+ 미해결) 사용자 보고 |
+| 8 browse | 🎉 파이프라인 완료 | (CRITICAL) `/riskzero-si-qa {기능명}` |
+
+### `/clear` 운용 정책 (단독 실행 안전성)
+
+- 각 단계 산출물은 `.si-planning/{기능명}/`에 저장되어 **자기완결적**이다. 따라서 단계 사이에 `/clear`로 컨텍스트를 비워도, 다음 서브 스킬이 직전 산출물 파일을 읽어 단독으로 실행된다.
+- 서브 스킬 대부분이 기능명을 인자로 받으므로, **다음 명령어에는 항상 `{기능명}`을 채워서** 출력한다. `/clear` 후 컨텍스트에서 기능명을 추론할 수 없기 때문이다.
+- 예외: `/riskzero-si-qa-checklist`는 기능명이 아니라 **메뉴명 / URL / 화면ID**를 받는다. Step 5→6 전환 푸터에서는 이 점을 명시한다.
+- 6→7, 7→8 전환은 `.si-planning/{기능명}/qa-checklist.md`를 기준으로 기능명을 자동 추론할 수 있으나, 혼선을 막기 위해 푸터에는 항상 기능명을 명시한다.
 
 ---
 
